@@ -38,7 +38,7 @@ function building(x,z,w,d,h,m){
 building(-20,12,13,13,9,sand);building(20,13,14,13,10,concrete);
 building(-21,-17,13,13,8,concrete);building(21,-17,14,13,9,sand);
 building(0,33,22,10,7,concrete);
-box("center combat wall",-1,1.65,5,19,3.3,1.1,concrete);box("wall steel cap",-1,3.34,5,19.3,.13,1.25,edge);
+box("center combat wall",-1,1.65,7,19,3.3,1.1,concrete);box("wall steel cap",-1,3.34,7,19.3,.13,1.25,edge);
 for(let i=0;i<6;i++){
  const x=-14+i*5.6,z=-2+(i%2)*5;
  const c=box("reinforced supply crate",x,.85,z,2.2,1.7,2.1,steel);
@@ -87,17 +87,18 @@ function makeBot(x,z,i){
  bots.push({root,body:torso,head,alive:true,phase:i,limbs});
 }
 [[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
-const weapon=new BABYLON.TransformNode("first person rifle",scene);weapon.parent=camera;weapon.position.set(.48,-.38,.82);
-box("rifle receiver",0,0,0,.23,.2,.72,black,weapon);
-box("rifle handguard",0,.015,.4,.19,.16,.55,steel,weapon);
-box("rifle barrel",0,.015,.83,.07,.07,.58,black,weapon);
-box("rifle stock",0,-.025,-.48,.18,.17,.42,uniform,weapon);
-box("rifle magazine",0,-.2,.1,.14,.32,.2,black,weapon);
-box("rifle optic mount",0,.14,.04,.15,.07,.24,steel,weapon);
-box("rifle optic",0,.22,.04,.14,.13,.2,black,weapon);
-const lens=box("optic lens",0,.22,.145,.085,.075,.012,redLight,weapon);
+const weapon=new BABYLON.TransformNode("first person rifle",scene);weapon.parent=camera;weapon.position.set(.42,-.43,1.05);weapon.rotation.set(0,0,0);
+function weaponBox(n,x,y,z,w,h,d,m){const o=box(n,x,y,z,w,h,d,m,weapon);o.isPickable=false;return o}
+weaponBox("rifle receiver",0,0,0,.19,.17,.55,black);
+weaponBox("rifle handguard",0,.005,.29,.16,.14,.42,steel);
+weaponBox("rifle barrel",0,.005,.62,.055,.055,.48,black);
+weaponBox("rifle stock",0,-.015,-.36,.15,.14,.34,uniform);
+weaponBox("rifle magazine",0,-.17,.08,.115,.25,.16,black);
+weaponBox("rifle optic mount",0,.12,.015,.12,.055,.18,steel);
+weaponBox("rifle optic",0,.19,.015,.115,.105,.16,black);
+weaponBox("optic lens",0,.19,.105,.07,.065,.012,redLight);
 const muzzleMat=material("muzzle flash material","#ffd477");muzzleMat.emissiveColor=new BABYLON.Color3(1,.55,.12);
-const muzzle=box("muzzle flash",0,0,1.18,.28,.25,.12,muzzleMat,weapon);muzzle.isVisible=false;
+const muzzle=weaponBox("muzzle flash",0,0,.91,.22,.2,.09,muzzleMat);muzzle.isVisible=false;
 let ammo=30,score=0,recoil=0,flashTimer=0;
 const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message");
 function updateHud(){ammoEl.textContent=ammo+" / 90"}
