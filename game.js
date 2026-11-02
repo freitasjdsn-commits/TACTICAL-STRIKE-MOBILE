@@ -10,6 +10,7 @@ scene.imageProcessingConfiguration.toneMappingEnabled=true;
 scene.imageProcessingConfiguration.exposure=1.12;
 scene.imageProcessingConfiguration.contrast=1.18;
 const camera=new BABYLON.FreeCamera("player",new BABYLON.Vector3(0,1.72,-13),scene);
+scene.activeCamera=camera;
 camera.fov=.88;camera.minZ=.06;camera.maxZ=180;camera.inputs.clear();
 const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.82;hemi.groundColor=new BABYLON.Color3(.2,.23,.25);
 const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.0;
