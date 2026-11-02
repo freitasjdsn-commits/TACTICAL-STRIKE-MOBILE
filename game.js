@@ -20,7 +20,7 @@ function box(n,x,y,z,w,h,d,m,parent){const o=BABYLON.MeshBuilder.CreateBox(n,{wi
 function cylinder(n,x,y,z,h,d,m,parent){const o=BABYLON.MeshBuilder.CreateCylinder(n,{height:h,diameter:d,tessellation:10},scene);o.position.set(x,y,z);o.material=m;if(parent)o.parent=parent;return o}
 function cast(o){o.receiveShadows=true;shadowGen.addShadowCaster(o);return o}
 const floor=box("asphalt training yard",0,-.4,0,100,.8,100,asphalt);floor.receiveShadows=true;
-for(let i=-5;i<=5;i++){box("road lane dash",i*3.8,-. -0.0,0,.045,.012,24,edge)}
+for(let i=-5;i<=5;i++){box("road lane dash",i*3.8,0,0,.045,.012,24,edge)}
 function building(x,z,w,d,h,m){
  const b=cast(box("combat building",x,h/2,z,w,h,d,m));
  box("roof parapet",x,h+.12,z,w+.35,.24,d+.35,steel);
