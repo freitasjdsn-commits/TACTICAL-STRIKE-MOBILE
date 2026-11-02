@@ -2,23 +2,23 @@
 "use strict";
 const canvas=document.querySelector("#renderCanvas");
 const engine=new BABYLON.Engine(canvas,true,{antialias:true, stencil:true, adaptToDeviceRatio:true});
-engine.setHardwareScalingLevel(Math.min(1.35,Math.max(1,window.devicePixelRatio||1)));
+engine.setHardwareScalingLevel(1);
 const scene=new BABYLON.Scene(engine);
 scene.clearColor=new BABYLON.Color4(.34,.48,.56,1);
-scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.0025;scene.fogColor=new BABYLON.Color3(.34,.48,.56);
+scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.0014;scene.fogColor=new BABYLON.Color3(.34,.48,.56);
 scene.imageProcessingConfiguration.toneMappingEnabled=true;
 scene.imageProcessingConfiguration.exposure=1.12;
 scene.imageProcessingConfiguration.contrast=1.18;
 const camera=new BABYLON.FreeCamera("player",new BABYLON.Vector3(0,1.72,-13),scene);
 camera.fov=.88;camera.minZ=.06;camera.maxZ=180;camera.inputs.clear();
 const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.82;hemi.groundColor=new BABYLON.Color3(.2,.23,.25);
-const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.35;
-const shadowGen=new BABYLON.ShadowGenerator(1024,sun);shadowGen.useBlurExponentialShadowMap=true;shadowGen.blurKernel=18;shadowGen.darkness=.28;
+const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.0;
+const shadowGen=null;
 function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 function box(n,x,y,z,w,h,d,m,parent){const o=BABYLON.MeshBuilder.CreateBox(n,{width:w,height:h,depth:d},scene);o.position.set(x,y,z);o.material=m;if(parent)o.parent=parent;return o}
 function cylinder(n,x,y,z,h,d,m,parent){const o=BABYLON.MeshBuilder.CreateCylinder(n,{height:h,diameter:d,tessellation:10},scene);o.position.set(x,y,z);o.material=m;if(parent)o.parent=parent;return o}
-function cast(o){o.receiveShadows=true;shadowGen.addShadowCaster(o);return o}
+function cast(o){return o}
 const floor=box("asphalt training yard",0,-.4,0,100,.8,100,asphalt);floor.receiveShadows=true;
 for(let i=-5;i<=5;i++){box("road lane dash",i*3.8,0,0,.045,.012,24,edge)}
 function building(x,z,w,d,h,m){
@@ -50,9 +50,9 @@ for(let i=0;i<5;i++){
  const x=-24+i*12;box("road barricade",x,.65,23,7,1.3,1.05,concrete);
  for(let k=-1;k<=1;k++)box("barricade reflective stripe",x+k*1.8,.68,22.45, .65,.75,.035,redLight);
 }
-for(let i=0;i<12;i++){
+for(let i=0;i<8;i++){
  const x=(i%6-2.5)*7,z=i<6?28:-29;
- const trunk=cylinder("yard tree trunk",x,1.1,z,2.2,.34,material("bark"+i,"#514b3e"));
+ const trunk=cylinder("yard tree trunk",x,1.1,z,2.2,.34,steel);
  const crown=BABYLON.MeshBuilder.CreateSphere("low foliage",{diameter:2.8,segments:7},scene);crown.position.set(x,2.5,z);crown.scaling.y=.78;crown.material=plant;
 }
 for(let i=0;i<9;i++){
@@ -157,7 +157,7 @@ scene.onBeforeRenderObservable.add(()=>{
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
  bots.forEach(b=>{if(b.alive){b.phase+=dt;b.root.position.x+=Math.sin(b.phase*1.3)*dt*.1;b.root.rotation.y=Math.atan2(camera.position.x-b.root.position.x,camera.position.z-b.root.position.z);b.limbs[0].rotation.x=Math.sin(b.phase*2)*.08;b.limbs[2].rotation.x=Math.sin(b.phase*2+.5)*.08}});
 });
-engine.runRenderLoop(()=>scene.render());
-window.addEventListener("resize",()=>engine.resize());
+engine.runRenderLoop(()=>{try{scene.render()}catch(err){console.error(err);const m=document.querySelector("#message");if(m)m.textContent="ERRO AO RENDERIZAR: "+err.message;engine.stopRenderLoop()}});
+window.addEventListener("resize",()=>{engine.resize();engine.setSize(canvas.clientWidth,canvas.clientHeight)});
 document.addEventListener("contextmenu",e=>e.preventDefault());updateHud();
 })();
