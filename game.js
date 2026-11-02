@@ -1,7 +1,7 @@
 (()=>{
 "use strict";
 const canvas=document.querySelector("#renderCanvas");
-const engine=new BABYLON.Engine(canvas,true,{antialias:true, stencil:true, adaptToDeviceRatio:true});
+const engine=new BABYLON.Engine(canvas,false,{disableWebGL2Support:true, powerPreference:"low-power", stencil:false, preserveDrawingBuffer:false, adaptToDeviceRatio:true});
 engine.setHardwareScalingLevel(1);
 const scene=new BABYLON.Scene(engine);
 scene.clearColor=new BABYLON.Color4(.34,.48,.56,1);
