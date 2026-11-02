@@ -151,8 +151,8 @@ scene.onBeforeRenderObservable.add(()=>{
  if(jumpTime>0){jumpTime-=dt;jumpOffset=Math.sin((.48-jumpTime)/.48*Math.PI)*.72}else jumpOffset=0;
  camera.position.y=1.72+jumpOffset;
  recoil=Math.max(0,recoil-dt*.5);
- const fwd=camera.getDirection(BABYLON.Axis.Z),right=camera.getDirection(BABYLON.Axis.X),up=camera.getDirection(BABYLON.Axis.Y);
- weapon.position.copyFrom(camera.position.add(right.scale(.43)).add(up.scale(-.39-recoil)).add(fwd.scale(.95)));
+ const fwd=camera.getDirection(BABYLON.Axis.Z),weaponRight=camera.getDirection(BABYLON.Axis.X),up=camera.getDirection(BABYLON.Axis.Y);
+ weapon.position.copyFrom(camera.position.add(weaponRight.scale(.43)).add(up.scale(-.39-recoil)).add(fwd.scale(.95)));
  weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
  bots.forEach(b=>{if(b.alive){b.phase+=dt;b.root.position.x+=Math.sin(b.phase*1.3)*dt*.1;b.root.rotation.y=Math.atan2(camera.position.x-b.root.position.x,camera.position.z-b.root.position.z);b.limbs[0].rotation.x=Math.sin(b.phase*2)*.08;b.limbs[2].rotation.x=Math.sin(b.phase*2+.5)*.08}});
