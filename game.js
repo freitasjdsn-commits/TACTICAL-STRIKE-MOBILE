@@ -80,7 +80,38 @@ for(const side of [-1,1]){
  const l=BABYLON.MeshBuilder.CreateCapsule("ally leg",{height:.88,radius:.16},scene);l.parent=allyRoot;l.position.set(side*.19,.43,0);l.material=uniform;
  box("ally boot",side*.19,.12,-.1,.34,.22,.45,black,allyRoot);
 }
-const bots=[];
+
+const foliageMat=material("olive foliage detail","#4f6848");
+const foliageLight=material("sunlit foliage","#82915c");
+const barkMat=material("tree bark","#51483b");
+function addShrub(x,z,scale=1){
+ const root=new BABYLON.TransformNode("tactical shrub",scene);root.position.set(x,0,z);root.scaling.setAll(scale);
+ for(let i=0;i<5;i++){
+  const leafMesh=BABYLON.MeshBuilder.CreateSphere("shrub leaf",{diameter:1.05,segments:7},scene);
+  leafMesh.parent=root;leafMesh.position.set(Math.cos(i*1.25)*.42,.48+(i%2)*.16,Math.sin(i*1.25)*.35);
+  leafMesh.scaling.set(1,.72,.82);leafMesh.material=i%2?foliageMat:foliageLight;
+ }
+ const base=BABYLON.MeshBuilder.CreateCylinder("shrub base",{height:.28,diameter:.65,tessellation:7},scene);
+ base.parent=root;base.position.y=.15;base.material=plant;
+ return root;
+}
+function addFacadeDetails(x,z,w,d,h){
+ for(let side of [-1,1]){
+  const faceZ=z+side*(d/2+.07);
+  for(let col=0;col<Math.max(2,Math.floor(w/4));col++){
+   const px=x-w/2+2+col*4;
+   box("vertical facade rib",px,h*.48,faceZ,.12,h*.92,.16,steel);
+   box("window sill",px+.9,2.95,faceZ-side*.04,2.0,.12,.22,edge);
+  }
+  box("facade corner armor",x-w/2-.08,h/2,faceZ,.2,h,.2,edge);
+  box("facade corner armor",x+w/2+.08,h/2,faceZ,.2,h,.2,edge);
+ }
+ box("roof ventilation unit",x,h+.42,z,.9,.55,.8,steel);
+ box("roof access hatch",x+2,h+.28,z+1.4,1.2,.12,1.4,shadow);
+}
+[[-27,7,1.1],[-26,15,.85],[26,8,1.1],[27,17,.9],[-23,-10,.8],[24,-11,.9],[-12,29,.8],[13,29,.9]].forEach(v=>addShrub(v[0],v[1],v[2]));
+[[-20,12,13,13,9], [20,13,14,13,10],[-21,-17,13,13,8],[21,-17,14,13,9],[0,33,22,10,7]].forEach(v=>addFacadeDetails(...v));
+\nconst bots=[];
 function makeBot(x,z,i){
  const root=new BABYLON.TransformNode("hostile "+i,scene);root.position.set(x,0,z);
  const torso=cast(BABYLON.MeshBuilder.CreateCapsule("enemy body",{height:1.05,radius:.34,tessellation:10},scene));torso.parent=root;torso.position.y=1.16;torso.material=red;
