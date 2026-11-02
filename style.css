@@ -3,7 +3,14 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;col
 #renderCanvas{width:100%;height:100%;display:block;touch-action:none;outline:none}
 header{position:absolute;top:0;left:0;right:0;padding:18px 20px;background:linear-gradient(180deg,#07101ef2,transparent);display:flex;justify-content:space-between;align-items:center;pointer-events:none;font-size:clamp(13px,3.2vw,20px);letter-spacing:1.7px;text-shadow:0 2px 7px #000;z-index:2}
 header span{color:#f0445d}header small{font-size:clamp(9px,2.2vw,14px);color:#d6e2e8;letter-spacing:2px}
-#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:300;color:#fff;text-shadow:0 0 5px #56dfff,0 0 12px #56dfff;pointer-events:none}
+#mission{position:absolute;top:15%;left:50%;transform:translateX(-50%);font-size:clamp(10px,2.6vw,16px);font-weight:800;letter-spacing:2.5px;color:#ff879c;text-shadow:0 2px 8px #000;white-space:nowrap;z-index:2;pointer-events:none}
+#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:300;color:#fff;text-shadow:0 0 5px #56dfff,0 0 12px #56dfff;pointer-events:none;z-index:3}
+#tactical{position:absolute;right:18px;top:76px;width:clamp(104px,20vw,150px);padding:9px;border:1px solid #9ac5d5aa;border-radius:12px;background:#071521c9;box-shadow:0 4px 15px #0006;z-index:3;pointer-events:none}
+.map-title{font-size:9px;letter-spacing:1.4px;font-weight:800;color:#e6f5fb;display:flex;justify-content:space-between}.map-title span{color:#82f1b2;font-size:8px}
+#minimap{height:clamp(70px,13vw,100px);margin-top:7px;position:relative;overflow:hidden;border-radius:6px;background:linear-gradient(35deg,transparent 47%,#6b8790 48%,#6b8790 50%,transparent 51%),linear-gradient(145deg,#344a51 25%,#516a70 25%,#516a70 27%,#263941 27%);border:1px solid #6f99a8}
+#minimap:before,#minimap:after{content:"";position:absolute;background:#82979a55}.#minimap:before{left:50%;top:0;width:3px;height:100%}#minimap:after{top:50%;left:0;width:100%;height:3px}
+.player-dot,.enemy-dot{position:absolute;width:8px;height:8px;border-radius:50%;z-index:2}.player-dot{left:48%;top:48%;background:#68e7ff;box-shadow:0 0 7px #68e7ff}.enemy-dot{background:#ff4059;box-shadow:0 0 6px #ff4059}.e1{left:18%;top:22%}.e2{left:76%;top:32%}.e3{left:70%;top:78%}.e4{left:24%;top:72%}
+.systems{display:flex;justify-content:space-between;margin-top:7px;font-size:8px;letter-spacing:1px;color:#b9d4de}.systems b{color:#7df0a8}
 #hud{position:absolute;left:18px;right:18px;bottom:18px;display:flex;justify-content:space-between;pointer-events:none;z-index:3}
 #hud b{padding:13px 17px;background:#091722df;border:1px solid #7898aa;border-radius:11px;box-shadow:0 5px 18px #0007;font-size:clamp(14px,3vw,20px);letter-spacing:.5px}
 #health{color:#8df0b0}#ammo{color:#fff}
@@ -13,6 +20,6 @@ header span{color:#f0445d}header small{font-size:clamp(9px,2.2vw,14px);color:#d6
 button{min-height:clamp(54px,10vw,78px);padding:12px 5px;border-radius:14px;border:2px solid #ff7186;background:linear-gradient(145deg,#b32c49f2,#7e2038f2);color:#fff;font-size:clamp(10px,2.5vw,16px);font-weight:800;letter-spacing:1px;touch-action:none;box-shadow:0 5px 15px #0007;text-shadow:0 1px 2px #0006}
 button:active{transform:scale(.96);filter:brightness(1.2)}
 #reload,#jump{background:linear-gradient(145deg,#19445bf2,#102b3df2);border-color:#83c6df}
-#message{position:absolute;top:18%;left:50%;transform:translateX(-50%);font-size:clamp(10px,2.7vw,17px);font-weight:700;letter-spacing:2px;color:#ff9aaa;white-space:nowrap;text-shadow:0 2px 8px #000;pointer-events:none;text-align:center;z-index:2}
-@media(max-width:380px){header{padding:13px 12px;letter-spacing:1px}#actions{right:3%;gap:7px}#joystick{left:3%}#hud{left:10px;right:10px;bottom:10px}}
-@media(orientation:landscape){#joystick{bottom:12%;left:4%}#actions{bottom:13%;right:4%}#hud{bottom:10px}#message{top:14%}}
+#message{position:absolute;top:19%;left:50%;transform:translateX(-50%);font-size:clamp(10px,2.4vw,15px);font-weight:700;letter-spacing:2px;color:#ff9aaa;white-space:nowrap;text-shadow:0 2px 8px #000;pointer-events:none;text-align:center;z-index:2}
+@media(max-width:480px){header{padding:13px 12px;letter-spacing:1px}#actions{right:3%;gap:7px}#joystick{left:3%}#hud{left:10px;right:10px;bottom:10px}#tactical{top:66px;right:10px;width:108px;padding:7px}}
+@media(orientation:landscape){#joystick{bottom:12%;left:4%}#actions{bottom:13%;right:4%}#hud{bottom:10px}#mission{top:13%}#tactical{top:65px}}
