@@ -111,7 +111,7 @@ function addFacadeDetails(x,z,w,d,h){
 }
 [[-27,7,1.1],[-26,15,.85],[26,8,1.1],[27,17,.9],[-23,-10,.8],[24,-11,.9],[-12,29,.8],[13,29,.9]].forEach(v=>addShrub(v[0],v[1],v[2]));
 [[-20,12,13,13,9], [20,13,14,13,10],[-21,-17,13,13,8],[21,-17,14,13,9],[0,33,22,10,7]].forEach(v=>addFacadeDetails(...v));
-\nconst bots=[];
+const bots=[];
 function makeBot(x,z,i){
  const root=new BABYLON.TransformNode("hostile "+i,scene);root.position.set(x,0,z);
  const torso=cast(BABYLON.MeshBuilder.CreateCapsule("enemy body",{height:1.05,radius:.34,tessellation:10},scene));torso.parent=root;torso.position.y=1.16;torso.material=red;
