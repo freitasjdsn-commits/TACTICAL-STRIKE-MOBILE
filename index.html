@@ -12,4 +12,12 @@
  }
 })();
 </script>
-<script src="game.js"></script></body></html>
+<script src="game.js"></script><style id="controls-hotfix">
+#actions{position:absolute!important;right:4%!important;bottom:18%!important;display:grid!important;grid-template-columns:64px 88px!important;grid-template-rows:64px 64px!important;grid-template-areas:"reload fire" "jump fire"!important;gap:9px!important;align-items:center!important;justify-items:center!important;z-index:30!important}
+#actions button{width:64px!important;height:64px!important;min-height:64px!important;padding:5px!important;border:2px solid #9aabb5!important;border-radius:50%!important;background:radial-gradient(circle at 35% 25%,#465661,#121b23 72%)!important;color:#f4f8fa!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;line-height:1.05!important;font-size:9px!important;letter-spacing:.3px!important;box-shadow:0 5px 14px #000b,inset 0 2px 5px #ffffff25!important}
+#actions #fire{grid-area:fire!important;width:88px!important;height:88px!important;min-height:88px!important;border:3px solid #ff8795!important;background:radial-gradient(circle at 35% 25%,#ff536b,#a70f2b 72%)!important;box-shadow:0 0 0 5px #ff526833,0 7px 20px #000c,inset 0 3px 8px #ffffff35!important;font-size:13px!important}
+#actions #reload{grid-area:reload!important;border-color:#83c6df!important}
+#actions #jump{grid-area:jump!important;border-color:#83c6df!important}
+#actions button:active{transform:scale(.91)!important;filter:brightness(1.3)!important}
+@media(orientation:landscape){#actions{right:5%!important;bottom:13%!important}}
+</style></body></html>
