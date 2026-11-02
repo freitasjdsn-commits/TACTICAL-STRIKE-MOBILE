@@ -40,8 +40,8 @@ building(-21,-17,13,13,8,concrete);building(21,-17,14,13,9,sand);
 building(0,33,22,10,7,concrete);
 box("center combat wall",-1,1.65,7,19,3.3,1.1,concrete);box("wall steel cap",-1,3.34,7,19.3,.13,1.25,edge);
 for(let i=0;i<6;i++){
- const x=-14+i*5.6,z=-2+(i%2)*5;
- const c=box("reinforced supply crate",x,.85,z,2.2,1.7,2.1,steel);
+ const x=-19+i*7.6,z=-5+(i%2)*7;
+ const c=box("reinforced supply crate",x,.85,z,2.2,1.7,2.1,concrete);
  for(let s of [-1,1])box("crate corner",x+s*1.02,.86,z-1.07,.12,1.55,.08,edge);
  box("crate red marking",x,.9,z-1.08,.72,.28,.035,redLight);
  box("crate lid",x,1.73,z,2.24,.09,2.14,edge);
@@ -87,18 +87,20 @@ function makeBot(x,z,i){
  bots.push({root,body:torso,head,alive:true,phase:i,limbs});
 }
 [[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
-const weapon=new BABYLON.TransformNode("first person rifle",scene);weapon.parent=camera;weapon.position.set(.42,-.43,1.05);weapon.rotation.set(0,0,0);
-function weaponBox(n,x,y,z,w,h,d,m){const o=box(n,x,y,z,w,h,d,m,weapon);o.isPickable=false;return o}
-weaponBox("rifle receiver",0,0,0,.19,.17,.55,black);
-weaponBox("rifle handguard",0,.005,.29,.16,.14,.42,steel);
-weaponBox("rifle barrel",0,.005,.62,.055,.055,.48,black);
-weaponBox("rifle stock",0,-.015,-.36,.15,.14,.34,uniform);
-weaponBox("rifle magazine",0,-.17,.08,.115,.25,.16,black);
-weaponBox("rifle optic mount",0,.12,.015,.12,.055,.18,steel);
-weaponBox("rifle optic",0,.19,.015,.115,.105,.16,black);
-weaponBox("optic lens",0,.19,.105,.07,.065,.012,redLight);
+const weapon=new BABYLON.TransformNode("first person rifle",scene);weapon.parent=camera;weapon.position.set(.62,-.58,1.65);weapon.rotation.set(0,0,0);
+function weaponBox(n,x,y,z,w,h,d,m){const o=BABYLON.MeshBuilder.CreateBox(n,{width:w,height:h,depth:d},scene);o.parent=weapon;o.position.set(x,y,z);o.material=m;o.isPickable=false;o.alwaysSelectAsActiveMesh=true;return o}
+weaponBox("rifle main body",0,0,0,.22,.19,.76,black);
+weaponBox("rifle upper rail",0,.115,.03,.19,.045,.66,edge);
+weaponBox("rifle foregrip",0,-.015,.39,.19,.16,.45,steel);
+weaponBox("rifle barrel",0,.005,.79,.075,.075,.55,black);
+weaponBox("rifle muzzle",0,.005,1.08,.12,.12,.12,edge);
+weaponBox("rifle stock",0,-.025,-.48,.18,.17,.43,uniform);
+weaponBox("rifle magazine",0,-.2,.08,.15,.34,.2,black);
+weaponBox("rifle optic base",0,.17,.03,.16,.06,.22,steel);
+weaponBox("rifle optic housing",0,.25,.03,.15,.13,.2,black);
+weaponBox("rifle optic lens",0,.25,.14,.09,.08,.015,redLight);
 const muzzleMat=material("muzzle flash material","#ffd477");muzzleMat.emissiveColor=new BABYLON.Color3(1,.55,.12);
-const muzzle=weaponBox("muzzle flash",0,0,.91,.22,.2,.09,muzzleMat);muzzle.isVisible=false;
+const muzzle=weaponBox("muzzle flash",0,0,1.22,.25,.24,.1,muzzleMat);muzzle.isVisible=false;
 let ammo=30,score=0,recoil=0,flashTimer=0;
 const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message");
 function updateHud(){ammoEl.textContent=ammo+" / 90"}
