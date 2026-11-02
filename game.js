@@ -38,10 +38,10 @@ function building(x,z,w,d,h,m){
 building(-20,12,13,13,9,sand);building(20,13,14,13,10,concrete);
 building(-21,-17,13,13,8,concrete);building(21,-17,14,13,9,sand);
 building(0,33,22,10,7,concrete);
-box("center combat wall",-1,1.65,7,19,3.3,1.1,concrete);box("wall steel cap",-1,3.34,7,19.3,.13,1.25,edge);
+box("left flank wall",-19,1.5,5,3,3,14,concrete);box("left wall cap",-19,3.05,5,3.2,.12,14.2,edge);box("right flank wall",19,1.5,10,3,3,14,concrete);box("right wall cap",19,3.05,10,3.2,.12,14.2,edge);
 for(let i=0;i<6;i++){
- const x=-19+i*7.6,z=-5+(i%2)*7;
- const c=box("reinforced supply crate",x,.85,z,2.2,1.7,2.1,concrete);
+ const x=(i%2===0?-24:24),z=-2+Math.floor(i/2)*9;
+ const c=box("reinforced supply crate",x,.85,z,2.2,1.7,2.1,steel);
  for(let s of [-1,1])box("crate corner",x+s*1.02,.86,z-1.07,.12,1.55,.08,edge);
  box("crate red marking",x,.9,z-1.08,.72,.28,.035,redLight);
  box("crate lid",x,1.73,z,2.24,.09,2.14,edge);
@@ -61,9 +61,23 @@ for(let i=0;i<9;i++){
  const lamp=box("security lamp",x,6.15,-25,.55,.16,.35,edge);
  const lm=material("lamp glow "+i,"#f7dba1");lm.emissiveColor=new BABYLON.Color3(.55,.4,.2);lamp.material=lm;
 }
-for(const p of [[-8,0,10],[12,0,8]])for(let j=0;j<9;j++){
+for(const p of [[-10,0,9],[11,0,12]])for(let j=0;j<12;j++){
  const s=BABYLON.MeshBuilder.CreateSphere("violet smoke cloud",{diameter:1.5+j*.13,segments:8},scene);
- s.position.set(p[0]+Math.sin(j*2)*.65,.5+j*.42,p[2]+Math.cos(j)*.45);s.material=purple;s.material.alpha=.10;s.material.disableLighting=true;
+ s.position.set(p[0]+Math.sin(j*2)*.65,.5+j*.42,p[2]+Math.cos(j)*.45);s.material=purple;s.material.alpha=.16;s.material.disableLighting=true;
+}
+
+// Friendly operator at the left flank: blue tactical suit and pale hair.
+const allyRoot=new BABYLON.TransformNode("friendly operator",scene);allyRoot.position.set(-5,0,-5);allyRoot.rotation.y=.35;
+const allyBlue=material("ally blue tactical suit","#254e75"),allyLight=material("ally armor blue","#4d83ad"),hair=material("white silver hair","#e5e9ed"),visor=material("operator visor","#192b3b",12,.4);
+const allyBody=cast(BABYLON.MeshBuilder.CreateCapsule("ally torso",{height:1.12,radius:.34},scene));allyBody.parent=allyRoot;allyBody.position.y=1.15;allyBody.material=allyBlue;
+box("ally chest armor",0,1.25,-.25,.62,.55,.12,allyLight,allyRoot);
+const allyHead=BABYLON.MeshBuilder.CreateSphere("ally head",{diameter:.43,segments:12},scene);allyHead.parent=allyRoot;allyHead.position.y=1.92;allyHead.material=skin;
+const allyHair=BABYLON.MeshBuilder.CreateSphere("operator white hair",{diameter:.54,segments:12},scene);allyHair.parent=allyRoot;allyHair.position.y=2.08;allyHair.scaling.set(1.05,.58,1.05);allyHair.material=hair;
+box("operator visor",0,1.98,-.25,.38,.12,.08,visor,allyRoot);
+for(const side of [-1,1]){
+ const a=BABYLON.MeshBuilder.CreateCapsule("ally arm",{height:.78,radius:.14},scene);a.parent=allyRoot;a.position.set(side*.46,1.2,0);a.rotation.z=side*.2;a.material=allyBlue;
+ const l=BABYLON.MeshBuilder.CreateCapsule("ally leg",{height:.88,radius:.16},scene);l.parent=allyRoot;l.position.set(side*.19,.43,0);l.material=uniform;
+ box("ally boot",side*.19,.12,-.1,.34,.22,.45,black,allyRoot);
 }
 const bots=[];
 function makeBot(x,z,i){
@@ -87,20 +101,22 @@ function makeBot(x,z,i){
  bots.push({root,body:torso,head,alive:true,phase:i,limbs});
 }
 [[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
-const weapon=new BABYLON.TransformNode("first person rifle",scene);weapon.parent=camera;weapon.position.set(.62,-.58,1.65);weapon.rotation.set(0,0,0);
-function weaponBox(n,x,y,z,w,h,d,m){const o=BABYLON.MeshBuilder.CreateBox(n,{width:w,height:h,depth:d},scene);o.parent=weapon;o.position.set(x,y,z);o.material=m;o.isPickable=false;o.alwaysSelectAsActiveMesh=true;return o}
-weaponBox("rifle main body",0,0,0,.22,.19,.76,black);
-weaponBox("rifle upper rail",0,.115,.03,.19,.045,.66,edge);
-weaponBox("rifle foregrip",0,-.015,.39,.19,.16,.45,steel);
-weaponBox("rifle barrel",0,.005,.79,.075,.075,.55,black);
-weaponBox("rifle muzzle",0,.005,1.08,.12,.12,.12,edge);
-weaponBox("rifle stock",0,-.025,-.48,.18,.17,.43,uniform);
-weaponBox("rifle magazine",0,-.2,.08,.15,.34,.2,black);
-weaponBox("rifle optic base",0,.17,.03,.16,.06,.22,steel);
-weaponBox("rifle optic housing",0,.25,.03,.15,.13,.2,black);
-weaponBox("rifle optic lens",0,.25,.14,.09,.08,.015,redLight);
+// Weapon is positioned in world space every frame, avoiding mobile camera-parent clipping.
+const weapon=new BABYLON.TransformNode("first person rifle",scene);
+function weaponBox(n,x,y,z,w,h,d,m){const o=BABYLON.MeshBuilder.CreateBox(n,{width:w,height:h,depth:d},scene);o.parent=weapon;o.position.set(x,y,z);o.material=m;o.isPickable=false;o.alwaysSelectAsActiveMesh=true;o.renderingGroupId=1;return o}
+weaponBox("rifle main body",0,0,0,.24,.2,.78,black);
+weaponBox("rifle red side rail",-.125,.015,.04,.025,.12,.54,redLight);
+weaponBox("rifle upper rail",0,.12,.02,.2,.045,.68,edge);
+weaponBox("rifle foregrip",0,-.015,.42,.2,.17,.42,steel);
+weaponBox("rifle barrel",0,.005,.82,.075,.075,.5,black);
+weaponBox("rifle muzzle",0,.005,1.08,.13,.13,.13,edge);
+weaponBox("rifle stock",0,-.025,-.5,.2,.18,.42,uniform);
+weaponBox("rifle magazine",0,-.22,.08,.16,.34,.2,black);
+weaponBox("rifle optic base",0,.18,.02,.16,.06,.22,redLight);
+weaponBox("rifle optic housing",0,.27,.02,.16,.13,.2,black);
+weaponBox("rifle optic lens",0,.27,.13,.095,.085,.018,redLight);
 const muzzleMat=material("muzzle flash material","#ffd477");muzzleMat.emissiveColor=new BABYLON.Color3(1,.55,.12);
-const muzzle=weaponBox("muzzle flash",0,0,1.22,.25,.24,.1,muzzleMat);muzzle.isVisible=false;
+const muzzle=weaponBox("muzzle flash",0,0,1.23,.26,.24,.1,muzzleMat);muzzle.isVisible=false;
 let ammo=30,score=0,recoil=0,flashTimer=0;
 const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message");
 function updateHud(){ammoEl.textContent=ammo+" / 90"}
@@ -134,7 +150,10 @@ scene.onBeforeRenderObservable.add(()=>{
  camera.position.x=Math.max(-31,Math.min(31,camera.position.x));camera.position.z=Math.max(-31,Math.min(31,camera.position.z));
  if(jumpTime>0){jumpTime-=dt;jumpOffset=Math.sin((.48-jumpTime)/.48*Math.PI)*.72}else jumpOffset=0;
  camera.position.y=1.72+jumpOffset;
- recoil=Math.max(0,recoil-dt*.5);weapon.position.y=-.38-recoil;weapon.rotation.x=recoil*.65;
+ recoil=Math.max(0,recoil-dt*.5);
+ const fwd=camera.getDirection(BABYLON.Axis.Z),right=camera.getDirection(BABYLON.Axis.X),up=camera.getDirection(BABYLON.Axis.Y);
+ weapon.position.copyFrom(camera.position.add(right.scale(.43)).add(up.scale(-.39-recoil)).add(fwd.scale(.95)));
+ weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
  bots.forEach(b=>{if(b.alive){b.phase+=dt;b.root.position.x+=Math.sin(b.phase*1.3)*dt*.1;b.root.rotation.y=Math.atan2(camera.position.x-b.root.position.x,camera.position.z-b.root.position.z);b.limbs[0].rotation.x=Math.sin(b.phase*2)*.08;b.limbs[2].rotation.x=Math.sin(b.phase*2+.5)*.08}});
 });
