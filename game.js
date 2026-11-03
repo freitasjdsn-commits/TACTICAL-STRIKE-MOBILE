@@ -130,7 +130,7 @@ function makeBot(x,z,i){
  }
  const rifle=box("hostile rifle",.04,1.13,-.48,.15,.14,.82,black,root);rifle.rotation.x=.08;
  const barrel=box("hostile rifle barrel",.04,1.15,-.95,.055,.055,.32,edge,root);
- bots.push({root,body:torso,head,alive:true,phase:i,limbs});
+ bots.push({root,body:torso,head,alive:true,phase:i,limbs,anchorX:x,anchorZ:z,patrolX:1.15+(i%3)*.22,patrolZ:.7+(i%2)*.25});
 }
 [[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
 // Weapon is positioned in world space every frame, avoiding mobile camera-parent clipping.
@@ -187,7 +187,7 @@ scene.onBeforeRenderObservable.add(()=>{
  weapon.position.copyFrom(camera.position.add(weaponRight.scale(.43)).add(up.scale(-.39-recoil)).add(fwd.scale(.95)));
  weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
- bots.forEach(b=>{if(b.alive){b.phase+=dt;b.root.position.x+=Math.sin(b.phase*1.3)*dt*.1;b.root.rotation.y=Math.atan2(camera.position.x-b.root.position.x,camera.position.z-b.root.position.z);b.limbs[0].rotation.x=Math.sin(b.phase*2)*.08;b.limbs[2].rotation.x=Math.sin(b.phase*2+.5)*.08}});
+ bots.forEach(b=>{if(b.alive){b.phase+=dt*1.05;const stride=b.phase*1.15;b.root.position.x=b.anchorX+Math.sin(stride)*b.patrolX;b.root.position.z=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;b.root.rotation.y=Math.atan2(camera.position.x-b.root.position.x,camera.position.z-b.root.position.z);const step=Math.sin(stride*2.2)*.34;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;}});
 });
 engine.runRenderLoop(()=>{try{scene.render()}catch(err){console.error(err);const m=document.querySelector("#message");if(m)m.textContent="ERRO AO RENDERIZAR: "+err.message;engine.stopRenderLoop()}});
 window.addEventListener("resize",()=>{engine.resize();engine.setSize(canvas.clientWidth,canvas.clientHeight)});
