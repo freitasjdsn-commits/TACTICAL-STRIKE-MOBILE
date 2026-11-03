@@ -176,13 +176,17 @@ weaponBox("rifle optic housing",0,.27,.02,.16,.13,.2,black);
 weaponBox("rifle optic lens",0,.27,.13,.095,.085,.018,redLight);
 const muzzleMat=material("muzzle flash material","#ffd477");muzzleMat.emissiveColor=new BABYLON.Color3(1,.55,.12);
 const muzzle=weaponBox("muzzle flash",0,0,1.23,.26,.24,.1,muzzleMat);muzzle.isVisible=false;
-let ammo=30,score=0,recoil=0,flashTimer=0;
-const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message");
+let ammo=30,score=0,recoil=0,flashTimer=0,health=100,gameOver=false,damageFlash=0;
+const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message"),healthEl=document.querySelector("#health");
+const damageOverlay=document.createElement("div");damageOverlay.id="damage-overlay";damageOverlay.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:25;opacity:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(255,20,45,.72) 100%);transition:opacity .08s";document.body.appendChild(damageOverlay);
+function updateHealth(){healthEl.textContent="♥ "+health;healthEl.style.color=health<=30?"#ff536b":health<=60?"#ffd477":"#8df0b0";}
+function damagePlayer(amount){if(gameOver)return;health=Math.max(0,health-amount);updateHealth();damageFlash=.22;damageOverlay.style.opacity=".9";msg.textContent="VOCÊ FOI ATINGIDO • -"+amount+" HP";if(health<=0){gameOver=true;msg.textContent="DERROTA — VOCÊ FOI ELIMINADO";damageOverlay.style.opacity="1";}}
 const tracerMat=material("enemy tracer material","#ff765f");tracerMat.emissiveColor=new BABYLON.Color3(1,.16,.08);
 const enemyTracers=[];
 function enemyShot(b){const start=b.root.position.add(new BABYLON.Vector3(0,1.18,0));const target=camera.position.add(new BABYLON.Vector3(0,-.35,0));const delta=target.subtract(start);const length=delta.length();const beam=BABYLON.MeshBuilder.CreateCylinder("enemy tracer",{height:length,diameter:.035,tessellation:6},scene);beam.material=tracerMat;beam.position=start.add(target).scale(.5);beam.rotationQuaternion=BABYLON.Quaternion.FromUnitVectorsToRef?BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Axis.Y,delta.normalize(),BABYLON.Quaternion.Identity()):null;if(!beam.rotationQuaternion){beam.lookAt(target);beam.rotation.x+=Math.PI/2;}enemyTracers.push({mesh:beam,life:.12});b.muzzleGlow.isVisible=true;b.alert=.35;}
 function updateHud(){ammoEl.textContent=ammo+" / 90"}
 function fire(){
+ if(gameOver){msg.textContent="DERROTA — RECARREGUE A PÁGINA PARA JOGAR NOVAMENTE";return}
  if(ammo<=0){msg.textContent="SEM MUNIÇÃO — RECARREGUE";return}
  ammo--;updateHud();recoil=.13;muzzle.isVisible=true;flashTimer=.075;
  const ray=camera.getForwardRay(100);
@@ -217,12 +221,13 @@ scene.onBeforeRenderObservable.add(()=>{
  weapon.position.copyFrom(camera.position.add(weaponRight.scale(.43)).add(up.scale(-.39-recoil)).add(fwd.scale(.95)));
  weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
+ if(damageFlash>0){damageFlash-=dt;if(damageFlash<=0&&!gameOver)damageOverlay.style.opacity="0"}
  bots.forEach(b=>{if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz);let combatStrafe=0;if(dist<10&&dist>3)combatStrafe=Math.sin(b.phase*1.7)*b.strafe*(b.role===1?1.15:.55);const pace=b.role===2?.45:b.role===1?1.25:.8;b.root.position.x=b.anchorX+Math.sin(stride)*b.patrolX+combatStrafe;b.root.position.z=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.role===2&&dist<8){b.root.position.x-=dx/(dist||1)*dt*.55;b.root.position.z-=dz/(dist||1)*dt*.55;}b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;
- b.attackCooldown-=dt;b.alert=Math.max(0,b.alert-dt);b.muzzleGlow.isVisible=b.alert>0;b.alertLamp.scaling.y=1+(b.alert>0?.5:0);if(dist<18&&dist>2.4&&b.attackCooldown<=0){b.attackCooldown=b.role===1?1.35:b.role===2?2.5:1.9;enemyShot(b);}
+ b.attackCooldown-=dt;b.alert=Math.max(0,b.alert-dt);b.muzzleGlow.isVisible=b.alert>0;b.alertLamp.scaling.y=1+(b.alert>0?.5:0);if(dist<18&&dist>2.4&&b.attackCooldown<=0){b.attackCooldown=b.role===1?1.35:b.role===2?2.5:1.9;enemyShot(b);damagePlayer(b.role===1?7:b.role===2?13:10);}
  }});
  enemyTracers.forEach(t=>{t.life-=dt;if(t.life<=0){t.mesh.dispose();} });for(let i=enemyTracers.length-1;i>=0;i--)if(enemyTracers[i].life<=0)enemyTracers.splice(i,1);
 });
 engine.runRenderLoop(()=>{try{scene.render()}catch(err){console.error(err);const m=document.querySelector("#message");if(m)m.textContent="ERRO AO RENDERIZAR: "+err.message;engine.stopRenderLoop()}});
 window.addEventListener("resize",()=>{engine.resize();engine.setSize(canvas.clientWidth,canvas.clientHeight)});
-document.addEventListener("contextmenu",e=>e.preventDefault());updateHud();
+document.addEventListener("contextmenu",e=>e.preventDefault());updateHud();updateHealth();
 })();
