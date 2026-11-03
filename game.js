@@ -8,19 +8,37 @@ scene.clearColor=new BABYLON.Color4(.34,.48,.56,1);
 scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.0014;scene.fogColor=new BABYLON.Color3(.34,.48,.56);
 scene.imageProcessingConfiguration.toneMappingEnabled=true;
 scene.imageProcessingConfiguration.exposure=1.12;
-scene.imageProcessingConfiguration.contrast=1.18;
+scene.imageProcessingConfiguration.contrast=1.2;
+scene.imageProcessingConfiguration.vignetteEnabled=true;
+scene.imageProcessingConfiguration.vignetteWeight=.28;
+scene.imageProcessingConfiguration.vignetteStretch=.18;
+scene.imageProcessingConfiguration.vignetteColor=new BABYLON.Color4(.025,.045,.065,1);
+scene.imageProcessingConfiguration.vignetteCameraFov=.5;
 const camera=new BABYLON.FreeCamera("player",new BABYLON.Vector3(0,1.72,-13),scene);
 scene.activeCamera=camera;
 camera.fov=.88;camera.minZ=.06;camera.maxZ=180;camera.inputs.clear();
 const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.82;hemi.groundColor=new BABYLON.Color3(.2,.23,.25);
 const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.0;
 const shadowGen=null;
+// Restrained bloom gives emissive weapon lights and tracers a cleaner tactical glow.
+const glowLayer=new BABYLON.GlowLayer("subtle tactical bloom",scene,{blurKernelSize:24});
+glowLayer.intensity=.32;
 function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 function box(n,x,y,z,w,h,d,m,parent){const o=BABYLON.MeshBuilder.CreateBox(n,{width:w,height:h,depth:d},scene);o.position.set(x,y,z);o.material=m;if(parent)o.parent=parent;return o}
 function cylinder(n,x,y,z,h,d,m,parent){const o=BABYLON.MeshBuilder.CreateCylinder(n,{height:h,diameter:d,tessellation:10},scene);o.position.set(x,y,z);o.material=m;if(parent)o.parent=parent;return o}
 function cast(o){return o}
 const floor=box("asphalt training yard",0,-.4,0,100,.8,100,asphalt);floor.receiveShadows=true;
+// Lightweight procedural surface detail: generated locally, no image downloads.
+const asphaltTexture=new BABYLON.DynamicTexture("worn asphalt texture",{width:512,height:512},scene,false);
+const asphaltCtx=asphaltTexture.getContext();
+asphaltCtx.fillStyle="#414b50";asphaltCtx.fillRect(0,0,512,512);
+let textureSeed=7319;
+function textureRand(){textureSeed=(textureSeed*1664525+1013904223)>>>0;return textureSeed/4294967296;}
+for(let i=0;i<11500;i++){const x=textureRand()*512,y=textureRand()*512,a=.025+textureRand()*.13,s=.5+textureRand()*2.8;asphaltCtx.fillStyle=textureRand()>.5?"rgba(210,218,214,"+a+")":"rgba(5,13,18,"+a+")";asphaltCtx.fillRect(x,y,s,s);}
+for(let i=0;i<34;i++){const x=textureRand()*512,y=textureRand()*512;asphaltCtx.strokeStyle="rgba(12,19,22,.22)";asphaltCtx.lineWidth=.7+textureRand()*1.2;asphaltCtx.beginPath();asphaltCtx.moveTo(x,y);asphaltCtx.lineTo(x+(textureRand()-.5)*45,y+textureRand()*26);asphaltCtx.stroke();}
+asphaltTexture.update(false);asphaltTexture.uScale=7;asphaltTexture.vScale=7;asphaltTexture.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;asphaltTexture.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;
+asphalt.diffuseTexture=asphaltTexture;asphalt.diffuseColor=new BABYLON.Color3(.88,.91,.93);asphalt.specularColor=new BABYLON.Color3(.055,.06,.065);
 for(let i=-5;i<=5;i++){box("road lane dash",i*3.8,0,0,.045,.012,24,edge)}
 function building(x,z,w,d,h,m){
  const b=cast(box("combat building",x,h/2,z,w,h,d,m));
