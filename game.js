@@ -58,13 +58,15 @@ scene.imageProcessingConfiguration.exposure=2.35;
 scene.imageProcessingConfiguration.contrast=.92;
 scene.fogDensity=0;
 scene.clearColor=new BABYLON.Color4(.78,.88,.96,1);
-sun.intensity=3.0;
-sun.diffuse=new BABYLON.Color3(1,1,.96);
-hemi.intensity=2.8;
-hemi.diffuse=new BABYLON.Color3(.95,.97,1);
-hemi.groundColor=new BABYLON.Color3(.82,.82,.76);
-scene.ambientColor=new BABYLON.Color3(.82,.84,.86);
-function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
+sun.intensity=3.6;
+sun.diffuse=new BABYLON.Color3(1,1,.98);
+hemi.intensity=3.4;
+hemi.diffuse=new BABYLON.Color3(1,1,1);
+hemi.groundColor=new BABYLON.Color3(.92,.91,.86);
+scene.ambientColor=new BABYLON.Color3(1,1,1);
+scene.imageProcessingConfiguration.applyByPostProcess=true;
+// Keep shaded faces readable even on mobile displays with limited dynamic range.
+function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.emissiveColor=m.diffuseColor.scale(.14);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
 sand.diffuseTexture=sandTex;sand.diffuseColor=new BABYLON.Color3(.94,.91,.84);sand.specularColor=new BABYLON.Color3(.08,.075,.065);
