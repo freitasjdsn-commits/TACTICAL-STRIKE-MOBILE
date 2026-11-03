@@ -308,7 +308,7 @@ function makeBot(x,z,i){
  bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,rifle,muzzleGlow,alertLamp,legacyMeshes:root.getChildMeshes(false),modelMeshes:[],animGroups:[],playAnim:null,animState:"",deathTimer:0,attackAnimLock:0,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1,alert:0,attackCooldown:1.5+i*.23,walkPhase:0,combatState:"patrol",stateTimer:0});
 }
 [[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
- // Rigged CC0 operators: full skinned GLB models with idle, walk, run, attack, hit and death clips.
+ // Rigged CC0 operators: load, normalize and attach complete skinned GLB characters.
  const rigUrls=[
   "https://gobkit.com/freebies/human004/Rifleman.glb",
   "https://gobkit.com/freebies/human004/ReconScout.glb",
@@ -317,29 +317,53 @@ function makeBot(x,z,i){
  const rigContainers={};
  async function rigBot(bot){
   try{
+   if(!BABYLON.SceneLoader||!BABYLON.SceneLoader.LoadAssetContainerAsync)throw new Error("Loader GLB não foi carregado");
    const key=String(bot.role),url=rigUrls[bot.role];
-   if(!rigContainers[key])rigContainers[key]=BABYLON.SceneLoader.LoadAssetContainerAsync("https://gobkit.com/freebies/human004/",url.split("/").pop(),scene);
+   if(!rigContainers[key])rigContainers[key]=BABYLON.SceneLoader.LoadAssetContainerAsync("",url,scene);
    const container=await rigContainers[key];
-   const instance=container.instantiateModelsToScene(n=>"operator "+bot.role+" "+bot.phase+" "+n,false);
-   const roots=instance.rootNodes||[];
-   roots.forEach(n=>{n.parent=bot.root;n.position.y=0;});
+   const instance=container.instantiateModelsToScene(n=>"rigged_"+bot.phase+"_"+n,false);
+   const modelRoot=new BABYLON.TransformNode("rigged operator root "+bot.phase,scene);
+   (instance.rootNodes||[]).forEach(n=>{n.parent=modelRoot;});
+   modelRoot.parent=bot.root;
    const meshes=[];
-   roots.forEach(n=>{if(n.getChildMeshes)meshes.push(...n.getChildMeshes(false));if(n instanceof BABYLON.AbstractMesh)meshes.push(n);});
+   (instance.rootNodes||[]).forEach(n=>{
+    if(n.getChildMeshes)meshes.push(...n.getChildMeshes());
+    if(n instanceof BABYLON.AbstractMesh)meshes.push(n);
+   });
    bot.modelMeshes=[...new Set(meshes)].filter(m=>m.getTotalVertices()>0);
-   if(!bot.modelMeshes.length)throw new Error("modelo sem malha");
+   if(!bot.modelMeshes.length)throw new Error("GLB carregou, mas não contém malhas visíveis");
+   bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.checkCollisions=false;});
+   modelRoot.computeWorldMatrix(true);
+   const bounds=modelRoot.getHierarchyBoundingVectors(true);
+   const height=bounds.max.y-bounds.min.y;
+   if(!Number.isFinite(height)||height<.05)throw new Error("escala inválida no modelo GLB");
+   const fit=2.05/height;
+   modelRoot.scaling.setAll(fit);
+   modelRoot.position.x=-(bounds.min.x+bounds.max.x)*.5*fit;
+   modelRoot.position.y=-bounds.min.y*fit;
+   modelRoot.position.z=-(bounds.min.z+bounds.max.z)*.5*fit;
    bot.legacyMeshes.forEach(m=>{m.isVisible=false;m.isPickable=false;});
-   bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.checkCollisions=false;});
    bot.animGroups=instance.animationGroups||[];
    bot.playAnim=(name,loop=true)=>{
     const group=bot.animGroups.find(g=>g.name.toLowerCase().includes(name.toLowerCase()));
-    if(!group)return;
-    if(bot.animState===name&&group.isPlaying)return;
+    if(!group)return false;
+    if(bot.animState===name&&group.isPlaying)return true;
     bot.animGroups.forEach(g=>g.stop());
     group.start(loop,1.0,group.from,group.to,false);
     bot.animState=name;
+    return true;
    };
-   bot.playAnim("Idle",true);
-  }catch(err){console.warn("Rigged operator unavailable; keeping procedural fallback",err);}
+   bot.modelRoot=modelRoot;
+   if(!bot.playAnim("Idle",true)&&bot.animGroups.length){
+    bot.animGroups.forEach(g=>g.stop());
+    bot.animGroups[0].start(true);
+   }
+   console.info("Operador 3D carregado",bot.phase,"malhas:",bot.modelMeshes.length,"animações:",bot.animGroups.map(g=>g.name));
+  }catch(err){
+   console.warn("Falha ao carregar operador 3D",bot.phase,err);
+   const out=document.querySelector("#message");
+   if(out)out.textContent="MODELO 3D NÃO CARREGOU: "+(err&&err.message?err.message:String(err));
+  }
  }
  bots.forEach(b=>rigBot(b));
 
