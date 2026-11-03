@@ -52,11 +52,17 @@ if(BABYLON.DefaultRenderingPipeline){
  imagePipeline.sharpen.colorAmount=.22;
  imagePipeline.sharpen.edgeAmount=.18;
 }
-scene.imageProcessingConfiguration.exposure=1.32;
-scene.imageProcessingConfiguration.contrast=1.14;
-scene.fogDensity=.00065;
-sun.intensity=1.35;
-hemi.intensity=1.18;
+// Bright, neutral daylight: these are the final overrides used by the scene.
+scene.imageProcessingConfiguration.toneMappingEnabled=false;
+scene.imageProcessingConfiguration.exposure=1.85;
+scene.imageProcessingConfiguration.contrast=1.02;
+scene.fogDensity=.00012;
+scene.fogColor=new BABYLON.Color3(.62,.72,.78);
+scene.clearColor=new BABYLON.Color4(.62,.72,.78,1);
+sun.intensity=2.15;
+hemi.intensity=2.0;
+hemi.groundColor=new BABYLON.Color3(.58,.6,.58);
+scene.ambientColor=new BABYLON.Color3(.52,.54,.56);
 function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
