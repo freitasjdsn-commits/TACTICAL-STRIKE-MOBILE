@@ -369,7 +369,11 @@ function makeBot(x,z,i){
    if(out)out.textContent="MODELO 3D NÃO CARREGOU: "+(err&&err.message?err.message:String(err));
   }
  }
- bots.forEach(b=>rigBot(b));
+ // Use the guaranteed visible in-scene operators; enlarge the complete character hierarchy.
+bots.forEach(b=>{
+ b.root.scaling.scaleInPlace(2.0);
+ b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
+});
 
 // Weapon is positioned in world space every frame, avoiding mobile camera-parent clipping.
 const weapon=new BABYLON.TransformNode("first person rifle",scene);
