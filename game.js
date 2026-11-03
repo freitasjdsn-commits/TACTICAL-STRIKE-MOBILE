@@ -221,7 +221,15 @@ function makeBot(x,z,i){
   box("assault chest magazine",.12,1.42,-.3,.14,.22,.06,black,root);
  }
  box("ammo pouch left",-.24,1.0,-.25,.16,.22,.12,black,root);box("ammo pouch right",.24,1.0,-.25,.16,.22,.12,black,root);
- const head=cast(BABYLON.MeshBuilder.CreateSphere("enemy head",{diameter:.43,segments:12},scene));head.parent=root;head.position.y=1.91;head.material=skin;
+ const faceMat=material("operator face tone "+i,["#c9967e","#ad806c","#d2a087","#986f60"][i%4],34);
+ const head=cast(BABYLON.MeshBuilder.CreateSphere("enemy head",{diameter:.43,segments:16},scene));head.parent=root;head.position.y=1.91;head.scaling.set(role===2?1.08:.96,1.02,.94);head.material=faceMat;
+ // Exposed facial structure beneath the helmet.
+ const nose=BABYLON.MeshBuilder.CreateSphere("operator nose",{diameter:.105,segments:8},scene);nose.parent=root;nose.position.set(0,1.91,-.365);nose.scaling.set(.72,1.25,.72);nose.material=faceMat;
+ for(const side of [-1,1]){
+  const eye=BABYLON.MeshBuilder.CreateSphere("operator eye",{diameter:.052,segments:8},scene);eye.parent=root;eye.position.set(side*.092,1.975,-.337);eye.scaling.set(1,.72,.55);eye.material=black;
+  const brow=box("operator brow",side*.092,2.025,-.33,.105,.035,.035,role===1?trimMat:uniform,root);brow.rotation.z=side*-.12;
+  const cheek=BABYLON.MeshBuilder.CreateSphere("cheek armor",{diameter:.15,segments:8},scene);cheek.parent=root;cheek.position.set(side*.16,1.84,-.275);cheek.scaling.set(.72,.72,.5);cheek.material=roleMat;
+ }
  const helmet=BABYLON.MeshBuilder.CreateSphere("enemy helmet",{diameter:.55,segments:12},scene);helmet.parent=root;helmet.position.y=2.09;helmet.scaling.y=.48;helmet.material=trimMat;
  box("helmet visor",0,2.05,-.25,.38,.09,.07,black,root);
  const limbs=[];
@@ -296,6 +304,7 @@ function makeBot(x,z,i){
  const barrel=box("hostile rifle barrel",.04,1.15,-.95,.055,.055,.32,edge,root);
  const muzzleGlow=box("enemy muzzle flash",.04,1.15,-1.16,.18,.18,.18,muzzleMat,root);muzzleGlow.isVisible=false;
  const alertLamp=box("enemy alert light",0,1.58,-.31,.1,.08,.035,trimMat,root);
+ root.scaling.setAll(role===1?1.015:role===2?1.075:.98);
  bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,rifle,muzzleGlow,alertLamp,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1,alert:0,attackCooldown:1.5+i*.23,walkPhase:0,combatState:"patrol",stateTimer:0});
 }
 [[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
@@ -392,7 +401,7 @@ scene.onBeforeRenderObservable.add(()=>{
  weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
  if(damageFlash>0){damageFlash-=dt;if(damageFlash<=0&&!gameOver)damageOverlay.style.opacity="0"}
- bots.forEach(b=>{if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;b.stateTimer-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz),nx=dx/(dist||1),nz=dz/(dist||1);if(b.stateTimer<=0){b.stateTimer=1.7+Math.random()*1.8;b.combatState=dist>18?"patrol":b.role===1?(dist<7?"reposition":"flank"):b.role===2?(dist<5?"advance":"hold"):(dist<5?"retreat":dist<13?"engage":"advance");}const pace=b.role===2?.45:b.role===1?1.25:.8;let targetX=b.anchorX+Math.sin(stride)*b.patrolX,targetZ=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.combatState==="advance"){targetX+=nx*(b.role===2?2.1:1.4);targetZ+=nz*(b.role===2?2.1:1.4);}else if(b.combatState==="retreat"){targetX-=nx*2;targetZ-=nz*2;}else if(b.combatState==="flank"||b.combatState==="reposition"){const side=b.combatState==="flank"?2.5:1.4;targetX+=nz*b.strafe*side;targetZ-=nx*b.strafe*side;}const speed=(b.combatState==="hold"?.12:b.role===2?.8:b.role===1?2.15:1.5)*dt;b.root.position.x+=Math.max(-speed,Math.min(speed,targetX-b.root.position.x));b.root.position.z+=Math.max(-speed,Math.min(speed,targetZ-b.root.position.z));b.root.position.x=Math.max(-29,Math.min(29,b.root.position.x));b.root.position.z=Math.max(-29,Math.min(29,b.root.position.z));b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;
+ bots.forEach(b=>{if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;b.stateTimer-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz),nx=dx/(dist||1),nz=dz/(dist||1);if(b.stateTimer<=0){b.stateTimer=1.7+Math.random()*1.8;b.combatState=dist>18?"patrol":b.role===1?(dist<7?"reposition":"flank"):b.role===2?(dist<5?"advance":"hold"):(dist<5?"retreat":dist<13?"engage":"advance");}const pace=b.role===2?.45:b.role===1?1.25:.8;let targetX=b.anchorX+Math.sin(stride)*b.patrolX,targetZ=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.combatState==="advance"){targetX+=nx*(b.role===2?2.1:1.4);targetZ+=nz*(b.role===2?2.1:1.4);}else if(b.combatState==="retreat"){targetX-=nx*2;targetZ-=nz*2;}else if(b.combatState==="flank"||b.combatState==="reposition"){const side=b.combatState==="flank"?2.5:1.4;targetX+=nz*b.strafe*side;targetZ-=nx*b.strafe*side;}const speed=(b.combatState==="hold"?.12:b.role===2?.8:b.role===1?2.15:1.5)*dt;b.root.position.x+=Math.max(-speed,Math.min(speed,targetX-b.root.position.x));b.root.position.z+=Math.max(-speed,Math.min(speed,targetZ-b.root.position.z));b.root.position.x=Math.max(-29,Math.min(29,b.root.position.x));b.root.position.z=Math.max(-29,Math.min(29,b.root.position.z));b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;b.root.position.y=Math.abs(Math.sin(stride*2.2))*.035*pace;b.body.rotation.z=Math.sin(stride*2.2)*.025*pace;b.head.rotation.x=Math.sin(stride*2.2+.6)*.018;
  b.attackCooldown-=dt;b.alert=Math.max(0,b.alert-dt);b.muzzleGlow.isVisible=b.alert>0;b.alertLamp.scaling.y=1+(b.alert>0?.5:0);if(dist<18&&dist>2.4&&b.attackCooldown<=0){b.attackCooldown=b.role===1?1.35:b.role===2?2.5:1.9;enemyShot(b);damagePlayer(b.role===1?7:b.role===2?13:10);}
  }});
  enemyTracers.forEach(t=>{t.life-=dt;if(t.life<=0){t.mesh.dispose();} });for(let i=enemyTracers.length-1;i>=0;i--)if(enemyTracers[i].life<=0)enemyTracers.splice(i,1);
