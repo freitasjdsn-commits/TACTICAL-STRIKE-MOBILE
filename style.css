@@ -107,3 +107,22 @@ header,#mission,#crosshair,#weapon-overlay,#hud,#joystick,#actions{z-index:5}
 /* Analógico menor para liberar espaço na tela */
 #joystick{width:clamp(88px,22vw,140px)!important;height:clamp(88px,22vw,140px)!important}
 #stick{width:36px!important;height:36px!important;margin:-18px 0 0 -18px!important}
+
+
+/* Mobile HUD readability: keep mission and combat feedback clear of the radar. */
+@media(max-width:600px){
+ #mission{
+  top:17%!important;left:14px!important;right:142px!important;
+  width:auto!important;transform:none!important;
+  white-space:normal!important;text-align:left!important;
+  font-size:clamp(11px,2.8vw,14px)!important;
+  line-height:1.35!important;letter-spacing:1.35px!important;
+ }
+ #message{
+  top:23%!important;left:14px!important;right:142px!important;
+  width:auto!important;transform:none!important;
+  white-space:normal!important;text-align:left!important;
+  font-size:clamp(10px,2.5vw,13px)!important;
+  line-height:1.35!important;letter-spacing:1px!important;
+ }
+}
