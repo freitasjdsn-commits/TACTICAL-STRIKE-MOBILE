@@ -114,24 +114,25 @@ function addFacadeDetails(x,z,w,d,h){
 const bots=[];
 function makeBot(x,z,i){
  const root=new BABYLON.TransformNode("hostile "+i,scene);root.position.set(x,0,z);
- const torso=cast(BABYLON.MeshBuilder.CreateCapsule("enemy body",{height:1.05,radius:.34,tessellation:10},scene));torso.parent=root;torso.position.y=1.16;torso.material=red;
+ const role=i%3;const roleMat=role===0?red:role===1?material("recon armor "+i,"#8b653d"):material("heavy armor "+i,"#713344");const trimMat=role===0?redLight:role===1?material("recon trim "+i,"#d2ad69"):material("heavy trim "+i,"#d05b68");
+ const torso=cast(BABYLON.MeshBuilder.CreateCapsule("enemy body",{height:1.05,radius:role===2?.39:.34,tessellation:10},scene));torso.parent=root;torso.position.y=1.16;torso.material=roleMat;
  const vest=box("armored chest rig",0,1.2,-.025,.68,.62,.43,uniform,root);
- box("red chest plate",0,1.3,-.25,.47,.4,.055,redLight,root);
+ box("red chest plate",0,1.3,-.25,role===2?.58:.47,.4,.055,trimMat,root);
  box("enemy tactical belt",0,.82,-.02,.68,.16,.42,black,root);
- box("enemy shoulder armor left",-.49,1.48,-.015,.3,.25,.38,red,root);
- box("enemy shoulder armor right",.49,1.48,-.015,.3,.25,.38,red,root);
+ box("enemy shoulder armor left",-.49,1.48,-.015,role===2?.38:.3,.25,.38,roleMat,root);
+ box("enemy shoulder armor right",.49,1.48,-.015,role===2?.38:.3,.25,.38,roleMat,root);
  box("enemy back radio pack",0,1.35,.27,.48,.58,.22,steel,root);
  box("enemy radio antenna",.18,1.83,.3,.035,.48,.035,edge,root);
  box("enemy chest insignia",0,1.32,-.29,.13,.19,.035,edge,root);
  box("ammo pouch left",-.24,1.0,-.25,.16,.22,.12,black,root);box("ammo pouch right",.24,1.0,-.25,.16,.22,.12,black,root);
  const head=cast(BABYLON.MeshBuilder.CreateSphere("enemy head",{diameter:.43,segments:12},scene));head.parent=root;head.position.y=1.91;head.material=skin;
- const helmet=BABYLON.MeshBuilder.CreateSphere("enemy helmet",{diameter:.55,segments:12},scene);helmet.parent=root;helmet.position.y=2.09;helmet.scaling.y=.48;helmet.material=redLight;
+ const helmet=BABYLON.MeshBuilder.CreateSphere("enemy helmet",{diameter:.55,segments:12},scene);helmet.parent=root;helmet.position.y=2.09;helmet.scaling.y=.48;helmet.material=trimMat;
  box("helmet visor",0,2.05,-.25,.38,.09,.07,black,root);
  const limbs=[];
  for(const side of [-1,1]){
-  const arm=cast(BABYLON.MeshBuilder.CreateCapsule("enemy arm",{height:.78,radius:.14},scene));arm.parent=root;arm.position.set(side*.48,1.2,-.01);arm.rotation.z=side*.22;arm.material=uniform;limbs.push(arm);
+  const arm=cast(BABYLON.MeshBuilder.CreateCapsule("enemy arm",{height:.78,radius:.14},scene));arm.parent=root;arm.position.set(side*.48,1.2,-.01);arm.rotation.z=side*.22;arm.material=role===1?roleMat:uniform;limbs.push(arm);
   const glove= BABYLON.MeshBuilder.CreateSphere("combat glove",{diameter:.29,segments:8},scene);glove.parent=root;glove.position.set(side*.51,.84,-.03);glove.material=black;
-  const leg=cast(BABYLON.MeshBuilder.CreateCapsule("enemy leg",{height:.88,radius:.17},scene));leg.parent=root;leg.position.set(side*.2,.43,0);leg.material=rubber;limbs.push(leg);
+  const leg=cast(BABYLON.MeshBuilder.CreateCapsule("enemy leg",{height:.88,radius:.17},scene));leg.parent=root;leg.position.set(side*.2,.43,0);leg.material=role===2?roleMat:rubber;limbs.push(leg);
   box("enemy knee pad",side*.2,.43,-.19,.29,.22,.12,red,root);
   box("enemy forearm guard",side*.48,1.05,-.13,.25,.3,.12,edge,root);
   const boot=box("combat boot",side*.2,.12,-.11,.35,.22,.52,black,root);
@@ -139,7 +140,7 @@ function makeBot(x,z,i){
  }
  const rifle=box("hostile rifle",.04,1.13,-.48,.15,.14,.82,black,root);rifle.rotation.x=.08;
  const barrel=box("hostile rifle barrel",.04,1.15,-.95,.055,.055,.32,edge,root);
- bots.push({root,body:torso,head,alive:true,phase:i,limbs,anchorX:x,anchorZ:z,patrolX:1.15+(i%3)*.22,patrolZ:.7+(i%2)*.25});
+ bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1});
 }
 [[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
 // Weapon is positioned in world space every frame, avoiding mobile camera-parent clipping.
@@ -196,7 +197,7 @@ scene.onBeforeRenderObservable.add(()=>{
  weapon.position.copyFrom(camera.position.add(weaponRight.scale(.43)).add(up.scale(-.39-recoil)).add(fwd.scale(.95)));
  weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
- bots.forEach(b=>{if(b.alive){b.phase+=dt*1.05;const stride=b.phase*1.15;b.root.position.x=b.anchorX+Math.sin(stride)*b.patrolX;b.root.position.z=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;b.root.rotation.y=Math.atan2(camera.position.x-b.root.position.x,camera.position.z-b.root.position.z);const step=Math.sin(stride*2.2)*.34;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;}});
+ bots.forEach(b=>{if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz);let combatStrafe=0;if(dist<10&&dist>3)combatStrafe=Math.sin(b.phase*1.7)*b.strafe*(b.role===1?1.15:.55);const pace=b.role===2?.45:b.role===1?1.25:.8;b.root.position.x=b.anchorX+Math.sin(stride)*b.patrolX+combatStrafe;b.root.position.z=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.role===2&&dist<8){b.root.position.x-=dx/(dist||1)*dt*.55;b.root.position.z-=dz/(dist||1)*dt*.55;}b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;}});
 });
 engine.runRenderLoop(()=>{try{scene.render()}catch(err){console.error(err);const m=document.querySelector("#message");if(m)m.textContent="ERRO AO RENDERIZAR: "+err.message;engine.stopRenderLoop()}});
 window.addEventListener("resize",()=>{engine.resize();engine.setSize(canvas.clientWidth,canvas.clientHeight)});
