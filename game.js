@@ -184,16 +184,35 @@ const resultOverlay=document.createElement("div");resultOverlay.id="match-result
 resultOverlay.innerHTML='<div style="width:min(90vw,420px);padding:30px 24px;border:1px solid #718692;background:linear-gradient(145deg,#182832,#0b1219);box-shadow:0 18px 60px #000b"><div id="result-kicker" style="font-size:12px;letter-spacing:4px;color:#a8bac4">OPERAÇÃO CONCLUÍDA</div><div id="result-title" style="font-size:clamp(32px,9vw,48px);font-weight:900;letter-spacing:2px;margin:14px 0">VITÓRIA</div><div id="result-detail" style="font-size:15px;color:#c2cdd2;margin-bottom:26px">ALVOS ELIMINADOS: 0/7</div><button id="restart-match" style="width:100%;padding:16px;border:0;background:#d63c50;color:white;font-weight:900;font-size:15px;letter-spacing:1.5px;border-radius:4px">JOGAR NOVAMENTE</button></div>';
 document.body.appendChild(resultOverlay);
 document.querySelector("#restart-match").addEventListener("click",()=>location.reload());
+// Original synthesized combat audio; starts only after a player gesture.
+let audioContext=null,audioMuted=false;
+const audioButton=document.querySelector("#audio-toggle");
+function playSfx(kind){
+ if(audioMuted)return;
+ try{
+  const AudioCtor=window.AudioContext||window.webkitAudioContext;
+  if(!AudioCtor)return;
+  if(!audioContext)audioContext=new AudioCtor();
+  if(audioContext.state==="suspended")audioContext.resume();
+  const now=audioContext.currentTime,osc=audioContext.createOscillator(),gain=audioContext.createGain();
+  const cfg=kind==="fire"?[118,48,.12,.12,"sawtooth"]:kind==="enemy"?[82,42,.09,.07,"triangle"]:kind==="reload"?[620,260,.18,.055,"square"]:kind==="hit"?[760,210,.13,.075,"triangle"]:[190,75,.2,.11,"sawtooth"];
+  osc.type=cfg[4];osc.frequency.setValueAtTime(cfg[0],now);osc.frequency.exponentialRampToValueAtTime(Math.max(35,cfg[1]),now+cfg[2]);
+  gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(cfg[3],now+.008);gain.gain.exponentialRampToValueAtTime(.0001,now+cfg[2]);
+  osc.connect(gain);gain.connect(audioContext.destination);osc.start(now);osc.stop(now+cfg[2]+.015);
+ }catch(e){}
+}
+audioButton.addEventListener("click",()=>{audioMuted=!audioMuted;audioButton.textContent=audioMuted?"SOM OFF":"SOM ON";audioButton.setAttribute("aria-pressed",String(!audioMuted));if(!audioMuted)playSfx("reload");});
 function finishMatch(won){if(gameOver)return;gameOver=true;msg.textContent=won?"ÁREA LIMPA — VITÓRIA":"DERROTA — VOCÊ FOI ELIMINADO";document.querySelector("#result-title").textContent=won?"VITÓRIA":"DERROTA";document.querySelector("#result-title").style.color=won?"#8df0b0":"#ff6378";document.querySelector("#result-detail").textContent="ALVOS ELIMINADOS: "+score+"/"+bots.length+(won?" • ÁREA SEGURA":" • OPERADOR ELIMINADO");resultOverlay.style.display="flex";if(!won)damageOverlay.style.opacity="1";}
 function updateHealth(){healthEl.textContent="♥ "+health;healthEl.style.color=health<=30?"#ff536b":health<=60?"#ffd477":"#8df0b0";}
-function damagePlayer(amount){if(gameOver)return;health=Math.max(0,health-amount);updateHealth();damageFlash=.22;damageOverlay.style.opacity=".9";msg.textContent="VOCÊ FOI ATINGIDO • -"+amount+" HP";if(health<=0)finishMatch(false);}
+function damagePlayer(amount){if(gameOver)return;playSfx("damage");health=Math.max(0,health-amount);updateHealth();damageFlash=.22;damageOverlay.style.opacity=".9";msg.textContent="VOCÊ FOI ATINGIDO • -"+amount+" HP";if(health<=0)finishMatch(false);}
 const tracerMat=material("enemy tracer material","#ff765f");tracerMat.emissiveColor=new BABYLON.Color3(1,.16,.08);
 const enemyTracers=[];
-function enemyShot(b){const start=b.root.position.add(new BABYLON.Vector3(0,1.18,0));const target=camera.position.add(new BABYLON.Vector3(0,-.35,0));const delta=target.subtract(start);const length=delta.length();const beam=BABYLON.MeshBuilder.CreateCylinder("enemy tracer",{height:length,diameter:.035,tessellation:6},scene);beam.material=tracerMat;beam.position=start.add(target).scale(.5);beam.rotationQuaternion=BABYLON.Quaternion.FromUnitVectorsToRef?BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Axis.Y,delta.normalize(),BABYLON.Quaternion.Identity()):null;if(!beam.rotationQuaternion){beam.lookAt(target);beam.rotation.x+=Math.PI/2;}enemyTracers.push({mesh:beam,life:.12});b.muzzleGlow.isVisible=true;b.alert=.35;}
+function enemyShot(b){playSfx("enemy");const start=b.root.position.add(new BABYLON.Vector3(0,1.18,0));const target=camera.position.add(new BABYLON.Vector3(0,-.35,0));const delta=target.subtract(start);const length=delta.length();const beam=BABYLON.MeshBuilder.CreateCylinder("enemy tracer",{height:length,diameter:.035,tessellation:6},scene);beam.material=tracerMat;beam.position=start.add(target).scale(.5);beam.rotationQuaternion=BABYLON.Quaternion.FromUnitVectorsToRef?BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Axis.Y,delta.normalize(),BABYLON.Quaternion.Identity()):null;if(!beam.rotationQuaternion){beam.lookAt(target);beam.rotation.x+=Math.PI/2;}enemyTracers.push({mesh:beam,life:.12});b.muzzleGlow.isVisible=true;b.alert=.35;}
 function updateHud(){ammoEl.textContent=ammo+" / 90"}
 const hitFlashMat=material("impact flash material","#ffe6a0");hitFlashMat.emissiveColor=new BABYLON.Color3(1,.72,.28);
 const hitEffects=[];
 function spawnHitEffect(point,headshot){
+ playSfx("hit");
  const burst=BABYLON.MeshBuilder.CreateSphere("hit impact",{diameter:headshot?.34:.24,segments:7},scene);burst.position.copyFrom(point);burst.material=hitFlashMat;burst.isPickable=false;
  const ring=BABYLON.MeshBuilder.CreateTorus("impact ring",{diameter:headshot?.62:.44,thickness:.035,tessellation:12},scene);ring.position.copyFrom(point);ring.material=redLight;ring.isPickable=false;
  hitEffects.push({mesh:burst,ring,life:.2,max:.2});
@@ -201,7 +220,7 @@ function spawnHitEffect(point,headshot){
 function fire(){
  if(gameOver){msg.textContent="PARTIDA ENCERRADA — TOQUE EM JOGAR NOVAMENTE";return}
  if(ammo<=0){msg.textContent="SEM MUNIÇÃO — RECARREGUE";return}
- ammo--;updateHud();recoil=.13;muzzle.isVisible=true;flashTimer=.075;
+ ammo--;updateHud();playSfx("fire");recoil=.13;muzzle.isVisible=true;flashTimer=.075;
  const ray=camera.getForwardRay(100);
  const hit=scene.pickWithRay(ray,m=>m.name==="enemy body"||m.name==="enemy head");
  if(hit.hit){
@@ -210,7 +229,7 @@ function fire(){
  }else msg.textContent="DISPARO";
 }
 document.querySelector("#fire").onpointerdown=e=>{e.preventDefault();fire()};
-document.querySelector("#reload").onpointerdown=e=>{e.preventDefault();ammo=30;updateHud();msg.textContent="RECARREGADO"};
+document.querySelector("#reload").onpointerdown=e=>{e.preventDefault();ammo=30;updateHud();playSfx("reload");msg.textContent="RECARREGADO"};
 let jumpOffset=0,jumpTime=0;
 document.querySelector("#jump").onpointerdown=e=>{e.preventDefault();if(jumpTime<=0)jumpTime=.48};
 let move={x:0,y:0},joy=document.querySelector("#joystick"),stick=document.querySelector("#stick"),jid=null;
