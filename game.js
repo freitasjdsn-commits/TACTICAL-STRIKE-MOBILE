@@ -93,11 +93,11 @@ function textureRand(){textureSeed=(textureSeed*1664525+1013904223)>>>0;return t
 for(let i=0;i<26000;i++){const x=textureRand()*1024,y=textureRand()*1024,a=.025+textureRand()*.13,s=.5+textureRand()*2.8;asphaltCtx.fillStyle=textureRand()>.5?"rgba(210,218,214,"+a+")":"rgba(5,13,18,"+a+")";asphaltCtx.fillRect(x,y,s,s);}
 for(let i=0;i<52;i++){const x=textureRand()*1024,y=textureRand()*1024;asphaltCtx.strokeStyle="rgba(12,19,22,.22)";asphaltCtx.lineWidth=.7+textureRand()*1.2;asphaltCtx.beginPath();asphaltCtx.moveTo(x,y);asphaltCtx.lineTo(x+(textureRand()-.5)*45,y+textureRand()*26);asphaltCtx.stroke();}
 asphaltTexture.update(false);asphaltTexture.anisotropicFilteringLevel=4;asphaltTexture.uScale=7;asphaltTexture.vScale=7;asphaltTexture.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;asphaltTexture.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;
-asphalt.diffuseTexture=asphaltTexture;asphalt.diffuseColor=new BABYLON.Color3(1,1,1);asphalt.emissiveColor=new BABYLON.Color3(.24,.25,.25);asphalt.specularColor=new BABYLON.Color3(.055,.06,.065);
-concrete.emissiveColor=new BABYLON.Color3(.16,.16,.15);
-sand.emissiveColor=new BABYLON.Color3(.18,.16,.12);
-steel.emissiveColor=new BABYLON.Color3(.08,.09,.1);
-edge.emissiveColor=new BABYLON.Color3(.1,.1,.1);
+asphalt.diffuseTexture=asphaltTexture;asphalt.diffuseColor=new BABYLON.Color3(1,1,1);asphalt.emissiveColor=new BABYLON.Color3(.38,.39,.38);asphalt.specularColor=new BABYLON.Color3(.055,.06,.065);
+concrete.emissiveColor=new BABYLON.Color3(.23,.23,.21);
+sand.emissiveColor=new BABYLON.Color3(.25,.22,.17);
+steel.emissiveColor=new BABYLON.Color3(.13,.14,.15);
+edge.emissiveColor=new BABYLON.Color3(.15,.15,.15);
 glass.emissiveColor=new BABYLON.Color3(.07,.09,.1);
 // Painted tactical lane edges, worn crossing bars and manhole details add readable scale.
 const paintMat=material("faded road paint","#c4bfae");paintMat.emissiveColor=new BABYLON.Color3(.035,.032,.025);
@@ -172,7 +172,7 @@ for(const side of [-1,1]){
 const foliageMat=material("olive foliage detail","#668b45");
 const foliageLight=material("sunlit foliage","#a4bd68");
 // Foliage uses a soft self-lit response so leaves retain green color on mobile.
-[plant,leaf,foliageMat,foliageLight].forEach((m)=>{m.disableLighting=true;m.emissiveColor=m.diffuseColor.scale(.72);m.diffuseColor=m.diffuseColor.scale(1.12);});
+[plant,leaf,foliageMat,foliageLight].forEach((m)=>{m.disableLighting=true;m.emissiveColor=m.diffuseColor.scale(.95);m.diffuseColor=m.diffuseColor.scale(1.28);});
 
 function addShrub(x,z,scale=1){
  const root=new BABYLON.TransformNode("tactical shrub",scene);root.position.set(x,0,z);root.scaling.setAll(scale);
@@ -403,8 +403,8 @@ function makeBot(x,z,i){
      const mat=mesh.material;
      if(mat){
       mat.disableLighting=false;
-      if(mat.albedoColor&&mat.emissiveColor){mat.emissiveColor=mat.albedoColor.scale(.12);}
-      else if(mat.diffuseColor&&mat.emissiveColor){mat.emissiveColor=mat.diffuseColor.scale(.12);}
+      if(mat.albedoColor&&mat.emissiveColor){mat.emissiveColor=mat.albedoColor.scale(.22);}
+      else if(mat.diffuseColor&&mat.emissiveColor){mat.emissiveColor=mat.diffuseColor.scale(.22);}
      }
     });
 
@@ -458,7 +458,9 @@ function makeBot(x,z,i){
  }
  // Carrega operadores humanoides rigged; em caso de falha, mantém o personagem de reserva.
 // Prioriza personagens humanoides 3D com esqueleto e animações; mantém os modelos locais como fallback.
-bots.forEach(b=>{rigBot(b);});
+msg.textContent="CARREGANDO SOLDADOS 3D...";
+let riggedCount=0;
+bots.forEach(b=>{rigBot(b).then(()=>{if(b.modelMeshes&&b.modelMeshes.length){riggedCount++;msg.textContent="SOLDADOS 3D CARREGADOS • "+riggedCount+"/"+bots.length;} });});
 bots.forEach(b=>{
  b.root.scaling.setAll(.792);
  b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
