@@ -4,12 +4,12 @@ const canvas=document.querySelector("#renderCanvas");
 const engine=new BABYLON.Engine(canvas,false,{disableWebGL2Support:true, powerPreference:"low-power", stencil:false, preserveDrawingBuffer:false, adaptToDeviceRatio:true});
 engine.setHardwareScalingLevel(1);
 const scene=new BABYLON.Scene(engine);
-scene.clearColor=new BABYLON.Color4(.34,.48,.56,1);
-scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.0014;scene.fogColor=new BABYLON.Color3(.34,.48,.56);
+scene.clearColor=new BABYLON.Color4(.48,.61,.68,1);
+scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.00065;scene.fogColor=new BABYLON.Color3(.48,.61,.68);
 scene.imageProcessingConfiguration.toneMappingEnabled=true;
 scene.imageProcessingConfiguration.exposure=1.12;
 scene.imageProcessingConfiguration.contrast=1.2;
-scene.imageProcessingConfiguration.vignetteEnabled=true;
+scene.imageProcessingConfiguration.vignetteEnabled=false;
 scene.imageProcessingConfiguration.vignetteWeight=.28;
 scene.imageProcessingConfiguration.vignetteStretch=.18;
 scene.imageProcessingConfiguration.vignetteColor=new BABYLON.Color4(.025,.045,.065,1);
@@ -17,8 +17,8 @@ scene.imageProcessingConfiguration.vignetteCameraFov=.5;
 const camera=new BABYLON.FreeCamera("player",new BABYLON.Vector3(0,1.72,-13),scene);
 scene.activeCamera=camera;
 camera.fov=.88;camera.minZ=.06;camera.maxZ=180;camera.inputs.clear();
-const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.82;hemi.groundColor=new BABYLON.Color3(.2,.23,.25);
-const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.0;
+const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=1.18;hemi.groundColor=new BABYLON.Color3(.2,.23,.25);
+const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.35;
 const shadowGen=null;
 // Large procedural sky dome: a visible horizon and dusk-to-day atmospheric gradient.
 const skyTex=new BABYLON.DynamicTexture("overcast blue sky",{width:512,height:256},scene,false);
@@ -52,11 +52,11 @@ if(BABYLON.DefaultRenderingPipeline){
  imagePipeline.sharpen.colorAmount=.22;
  imagePipeline.sharpen.edgeAmount=.18;
 }
-scene.imageProcessingConfiguration.exposure=1.18;
+scene.imageProcessingConfiguration.exposure=1.32;
 scene.imageProcessingConfiguration.contrast=1.14;
-scene.fogDensity=.00115;
-sun.intensity=1.12;
-hemi.intensity=.92;
+scene.fogDensity=.00065;
+sun.intensity=1.35;
+hemi.intensity=1.18;
 function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
