@@ -305,9 +305,44 @@ function makeBot(x,z,i){
  const muzzleGlow=box("enemy muzzle flash",.04,1.15,-1.16,.18,.18,.18,muzzleMat,root);muzzleGlow.isVisible=false;
  const alertLamp=box("enemy alert light",0,1.58,-.31,.1,.08,.035,trimMat,root);
  root.scaling.setAll(role===1?1.015:role===2?1.075:.98);
- bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,rifle,muzzleGlow,alertLamp,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1,alert:0,attackCooldown:1.5+i*.23,walkPhase:0,combatState:"patrol",stateTimer:0});
+ bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,rifle,muzzleGlow,alertLamp,legacyMeshes:root.getChildMeshes(false),modelMeshes:[],animGroups:[],playAnim:null,animState:"",deathTimer:0,attackAnimLock:0,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1,alert:0,attackCooldown:1.5+i*.23,walkPhase:0,combatState:"patrol",stateTimer:0});
 }
 [[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
+ // Rigged CC0 operators: full skinned GLB models with idle, walk, run, attack, hit and death clips.
+ const rigUrls=[
+  "https://gobkit.com/freebies/human004/Rifleman.glb",
+  "https://gobkit.com/freebies/human004/ReconScout.glb",
+  "https://gobkit.com/freebies/human004/MachineGunner.glb"
+ ];
+ const rigContainers={};
+ async function rigBot(bot){
+  try{
+   const key=String(bot.role),url=rigUrls[bot.role];
+   if(!rigContainers[key])rigContainers[key]=BABYLON.SceneLoader.LoadAssetContainerAsync("https://gobkit.com/freebies/human004/",url.split("/").pop(),scene);
+   const container=await rigContainers[key];
+   const instance=container.instantiateModelsToScene(n=>"operator "+bot.role+" "+bot.phase+" "+n,false);
+   const roots=instance.rootNodes||[];
+   roots.forEach(n=>{n.parent=bot.root;n.position.y=0;});
+   const meshes=[];
+   roots.forEach(n=>{if(n.getChildMeshes)meshes.push(...n.getChildMeshes(false));if(n instanceof BABYLON.AbstractMesh)meshes.push(n);});
+   bot.modelMeshes=[...new Set(meshes)].filter(m=>m.getTotalVertices()>0);
+   if(!bot.modelMeshes.length)throw new Error("modelo sem malha");
+   bot.legacyMeshes.forEach(m=>{m.isVisible=false;m.isPickable=false;});
+   bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.checkCollisions=false;});
+   bot.animGroups=instance.animationGroups||[];
+   bot.playAnim=(name,loop=true)=>{
+    const group=bot.animGroups.find(g=>g.name.toLowerCase().includes(name.toLowerCase()));
+    if(!group)return;
+    if(bot.animState===name&&group.isPlaying)return;
+    bot.animGroups.forEach(g=>g.stop());
+    group.start(loop,1.0,group.from,group.to,false);
+    bot.animState=name;
+   };
+   bot.playAnim("Idle",true);
+  }catch(err){console.warn("Rigged operator unavailable; keeping procedural fallback",err);}
+ }
+ bots.forEach(b=>rigBot(b));
+
 // Weapon is positioned in world space every frame, avoiding mobile camera-parent clipping.
 const weapon=new BABYLON.TransformNode("first person rifle",scene);
 function weaponBox(n,x,y,z,w,h,d,m){const o=BABYLON.MeshBuilder.CreateBox(n,{width:w,height:h,depth:d},scene);o.parent=weapon;o.position.set(x,y,z);o.material=m;o.isPickable=false;o.alwaysSelectAsActiveMesh=true;o.renderingGroupId=1;return o}
@@ -354,7 +389,7 @@ function updateHealth(){healthEl.textContent="♥ "+health;healthEl.style.color=
 function damagePlayer(amount){if(gameOver)return;playSfx("damage");health=Math.max(0,health-amount);updateHealth();damageFlash=.22;damageOverlay.style.opacity=".9";msg.textContent="VOCÊ FOI ATINGIDO • -"+amount+" HP";if(health<=0)finishMatch(false);}
 const tracerMat=material("enemy tracer material","#ff765f");tracerMat.emissiveColor=new BABYLON.Color3(1,.16,.08);
 const enemyTracers=[];
-function enemyShot(b){playSfx("enemy");const start=b.root.position.add(new BABYLON.Vector3(0,1.18,0));const target=camera.position.add(new BABYLON.Vector3(0,-.35,0));const delta=target.subtract(start);const length=delta.length();const beam=BABYLON.MeshBuilder.CreateCylinder("enemy tracer",{height:length,diameter:.035,tessellation:6},scene);beam.material=tracerMat;beam.position=start.add(target).scale(.5);beam.rotationQuaternion=BABYLON.Quaternion.FromUnitVectorsToRef?BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Axis.Y,delta.normalize(),BABYLON.Quaternion.Identity()):null;if(!beam.rotationQuaternion){beam.lookAt(target);beam.rotation.x+=Math.PI/2;}enemyTracers.push({mesh:beam,life:.12});b.muzzleGlow.isVisible=true;b.alert=.35;}
+function enemyShot(b){playSfx("enemy");if(b.playAnim){b.attackAnimLock=.6;b.playAnim("Attack",false);}const start=b.root.position.add(new BABYLON.Vector3(0,1.18,0));const target=camera.position.add(new BABYLON.Vector3(0,-.35,0));const delta=target.subtract(start);const length=delta.length();const beam=BABYLON.MeshBuilder.CreateCylinder("enemy tracer",{height:length,diameter:.035,tessellation:6},scene);beam.material=tracerMat;beam.position=start.add(target).scale(.5);beam.rotationQuaternion=BABYLON.Quaternion.FromUnitVectorsToRef?BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Axis.Y,delta.normalize(),BABYLON.Quaternion.Identity()):null;if(!beam.rotationQuaternion){beam.lookAt(target);beam.rotation.x+=Math.PI/2;}enemyTracers.push({mesh:beam,life:.12});b.muzzleGlow.isVisible=true;b.alert=.35;}
 function updateHud(){ammoEl.textContent=ammo+" / 90"}
 const hitFlashMat=material("impact flash material","#ffe6a0");hitFlashMat.emissiveColor=new BABYLON.Color3(1,.72,.28);
 const hitEffects=[];
@@ -369,10 +404,10 @@ function fire(){
  if(ammo<=0){msg.textContent="SEM MUNIÇÃO — RECARREGUE";return}
  ammo--;updateHud();playSfx("fire");recoil=.13;muzzle.isVisible=true;flashTimer=.075;
  const ray=camera.getForwardRay(100);
- const hit=scene.pickWithRay(ray,m=>m.name==="enemy body"||m.name==="enemy head");
+ const hit=scene.pickWithRay(ray,m=>m.name==="enemy body"||m.name==="enemy head"||bots.some(b=>b.alive&&b.modelMeshes.includes(m)));
  if(hit.hit){
-  const bot=bots.find(b=>b.alive&&(b.body===hit.pickedMesh||b.head===hit.pickedMesh));
-  if(bot){const headshot=hit.pickedMesh===bot.head;spawnHitEffect(hit.pickedPoint,headshot);bot.alive=false;bot.root.setEnabled(false);score++;msg.textContent=(headshot?"TIRO NA CABEÇA":"ALVO ELIMINADO")+" • "+score+"/"+bots.length;if(score===bots.length)finishMatch(true)}
+  const bot=bots.find(b=>b.alive&&(b.body===hit.pickedMesh||b.head===hit.pickedMesh||b.modelMeshes.includes(hit.pickedMesh)));
+  if(bot){const headshot=hit.pickedMesh===bot.head;spawnHitEffect(hit.pickedPoint,headshot);bot.alive=false;bot.deathTimer=1.6;if(bot.playAnim)bot.playAnim("Death",false);else bot.root.setEnabled(false);score++;msg.textContent=(headshot?"TIRO NA CABEÇA":"ALVO ELIMINADO")+" • "+score+"/"+bots.length;if(score===bots.length)finishMatch(true)}
  }else msg.textContent="DISPARO";
 }
 document.querySelector("#fire").onpointerdown=e=>{e.preventDefault();fire()};
@@ -401,7 +436,7 @@ scene.onBeforeRenderObservable.add(()=>{
  weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
  if(damageFlash>0){damageFlash-=dt;if(damageFlash<=0&&!gameOver)damageOverlay.style.opacity="0"}
- bots.forEach(b=>{if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;b.stateTimer-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz),nx=dx/(dist||1),nz=dz/(dist||1);if(b.stateTimer<=0){b.stateTimer=1.7+Math.random()*1.8;b.combatState=dist>18?"patrol":b.role===1?(dist<7?"reposition":"flank"):b.role===2?(dist<5?"advance":"hold"):(dist<5?"retreat":dist<13?"engage":"advance");}const pace=b.role===2?.45:b.role===1?1.25:.8;let targetX=b.anchorX+Math.sin(stride)*b.patrolX,targetZ=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.combatState==="advance"){targetX+=nx*(b.role===2?2.1:1.4);targetZ+=nz*(b.role===2?2.1:1.4);}else if(b.combatState==="retreat"){targetX-=nx*2;targetZ-=nz*2;}else if(b.combatState==="flank"||b.combatState==="reposition"){const side=b.combatState==="flank"?2.5:1.4;targetX+=nz*b.strafe*side;targetZ-=nx*b.strafe*side;}const speed=(b.combatState==="hold"?.12:b.role===2?.8:b.role===1?2.15:1.5)*dt;b.root.position.x+=Math.max(-speed,Math.min(speed,targetX-b.root.position.x));b.root.position.z+=Math.max(-speed,Math.min(speed,targetZ-b.root.position.z));b.root.position.x=Math.max(-29,Math.min(29,b.root.position.x));b.root.position.z=Math.max(-29,Math.min(29,b.root.position.z));b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;b.root.position.y=Math.abs(Math.sin(stride*2.2))*.035*pace;b.body.rotation.z=Math.sin(stride*2.2)*.025*pace;b.head.rotation.x=Math.sin(stride*2.2+.6)*.018;
+ bots.forEach(b=>{if(!b.alive&&b.deathTimer>0){b.deathTimer-=dt;if(b.deathTimer<=0)b.root.setEnabled(false);}if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;b.stateTimer-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz),nx=dx/(dist||1),nz=dz/(dist||1);if(b.stateTimer<=0){b.stateTimer=1.7+Math.random()*1.8;b.combatState=dist>18?"patrol":b.role===1?(dist<7?"reposition":"flank"):b.role===2?(dist<5?"advance":"hold"):(dist<5?"retreat":dist<13?"engage":"advance");}const pace=b.role===2?.45:b.role===1?1.25:.8;let targetX=b.anchorX+Math.sin(stride)*b.patrolX,targetZ=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.combatState==="advance"){targetX+=nx*(b.role===2?2.1:1.4);targetZ+=nz*(b.role===2?2.1:1.4);}else if(b.combatState==="retreat"){targetX-=nx*2;targetZ-=nz*2;}else if(b.combatState==="flank"||b.combatState==="reposition"){const side=b.combatState==="flank"?2.5:1.4;targetX+=nz*b.strafe*side;targetZ-=nx*b.strafe*side;}const speed=(b.combatState==="hold"?.12:b.role===2?.8:b.role===1?2.15:1.5)*dt;if(b.playAnim){b.attackAnimLock=Math.max(0,b.attackAnimLock-dt);if(b.attackAnimLock<=0)b.playAnim(speed>.025?(b.role===1?"Run":"Walk"):"Idle",true);}b.root.position.x+=Math.max(-speed,Math.min(speed,targetX-b.root.position.x));b.root.position.z+=Math.max(-speed,Math.min(speed,targetZ-b.root.position.z));b.root.position.x=Math.max(-29,Math.min(29,b.root.position.x));b.root.position.z=Math.max(-29,Math.min(29,b.root.position.z));b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;b.root.position.y=Math.abs(Math.sin(stride*2.2))*.035*pace;b.body.rotation.z=Math.sin(stride*2.2)*.025*pace;b.head.rotation.x=Math.sin(stride*2.2+.6)*.018;
  b.attackCooldown-=dt;b.alert=Math.max(0,b.alert-dt);b.muzzleGlow.isVisible=b.alert>0;b.alertLamp.scaling.y=1+(b.alert>0?.5:0);if(dist<18&&dist>2.4&&b.attackCooldown<=0){b.attackCooldown=b.role===1?1.35:b.role===2?2.5:1.9;enemyShot(b);damagePlayer(b.role===1?7:b.role===2?13:10);}
  }});
  enemyTracers.forEach(t=>{t.life-=dt;if(t.life<=0){t.mesh.dispose();} });for(let i=enemyTracers.length-1;i>=0;i--)if(enemyTracers[i].life<=0)enemyTracers.splice(i,1);
