@@ -307,7 +307,7 @@ function makeBot(x,z,i){
  root.scaling.setAll(role===1?1.015:role===2?1.075:.98);
  bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,rifle,muzzleGlow,alertLamp,legacyMeshes:root.getChildMeshes(false),modelMeshes:[],animGroups:[],playAnim:null,animState:"",deathTimer:0,attackAnimLock:0,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1,alert:0,attackCooldown:1.5+i*.23,walkPhase:0,combatState:"patrol",stateTimer:0});
 }
-[[-6,1],[6,3],[-8,7],[8,8],[0,12],[-3,15],[3,17]].forEach((p,i)=>makeBot(p[0],p[1],i));
+[[-3,-8],[3,-7],[-4,-4],[4,-3],[0,0],[-2,3],[2,5]].forEach((p,i)=>makeBot(p[0],p[1],i));
  // Rigged CC0 operators: load, normalize and attach complete skinned GLB characters.
  const rigUrls=[
   "https://gobkit.com/freebies/human004/Rifleman.glb",
@@ -371,7 +371,7 @@ function makeBot(x,z,i){
  }
  // Use the guaranteed visible in-scene operators; enlarge the complete character hierarchy.
 bots.forEach(b=>{
- b.root.scaling.scaleInPlace(2.0);
+ b.root.scaling.setAll(.78);
  b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
 });
 
