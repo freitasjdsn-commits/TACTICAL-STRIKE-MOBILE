@@ -111,6 +111,7 @@ function addFacadeDetails(x,z,w,d,h){
 }
 [[-27,7,1.1],[-26,15,.85],[26,8,1.1],[27,17,.9],[-23,-10,.8],[24,-11,.9],[-12,29,.8],[13,29,.9]].forEach(v=>addShrub(v[0],v[1],v[2]));
 [[-20,12,13,13,9], [20,13,14,13,10],[-21,-17,13,13,8],[21,-17,14,13,9],[0,33,22,10,7]].forEach(v=>addFacadeDetails(...v));
+const muzzleMat=material("muzzle flash material","#ffd477");muzzleMat.emissiveColor=new BABYLON.Color3(1,.55,.12);
 const bots=[];
 function makeBot(x,z,i){
  const root=new BABYLON.TransformNode("hostile "+i,scene);root.position.set(x,0,z);
@@ -174,7 +175,7 @@ weaponBox("rifle magazine",0,-.22,.08,.16,.34,.2,black);
 weaponBox("rifle optic base",0,.18,.02,.16,.06,.22,redLight);
 weaponBox("rifle optic housing",0,.27,.02,.16,.13,.2,black);
 weaponBox("rifle optic lens",0,.27,.13,.095,.085,.018,redLight);
-const muzzleMat=material("muzzle flash material","#ffd477");muzzleMat.emissiveColor=new BABYLON.Color3(1,.55,.12);
+
 const muzzle=weaponBox("muzzle flash",0,0,1.23,.26,.24,.1,muzzleMat);muzzle.isVisible=false;
 let ammo=30,score=0,recoil=0,flashTimer=0,health=100,gameOver=false,damageFlash=0;
 const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message"),healthEl=document.querySelector("#health");
