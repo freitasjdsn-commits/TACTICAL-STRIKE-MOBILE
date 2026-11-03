@@ -371,7 +371,7 @@ function makeBot(x,z,i){
  }
  // Use the guaranteed visible in-scene operators; enlarge the complete character hierarchy.
 bots.forEach(b=>{
- b.root.scaling.setAll(.55);
+ b.root.scaling.setAll(.72);
  b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
 });
 
