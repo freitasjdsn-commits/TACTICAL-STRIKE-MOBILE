@@ -23,7 +23,7 @@ const shadowGen=null;
 // Large procedural sky dome: a visible horizon and dusk-to-day atmospheric gradient.
 const skyTex=new BABYLON.DynamicTexture("overcast blue sky",{width:512,height:256},scene,false);
 const skyCtx=skyTex.getContext(),skyGrad=skyCtx.createLinearGradient(0,0,0,256);
-skyGrad.addColorStop(0,"#69b8f2");skyGrad.addColorStop(.38,"#91cef5");skyGrad.addColorStop(.72,"#c8e5f5");skyGrad.addColorStop(1,"#f5e7c9");
+skyGrad.addColorStop(0,"#8acfff");skyGrad.addColorStop(.38,"#b6e2ff");skyGrad.addColorStop(.72,"#e1f2ff");skyGrad.addColorStop(1,"#fff4d9");
 skyCtx.fillStyle=skyGrad;skyCtx.fillRect(0,0,512,256);
 for(let i=0;i<95;i++){const x=Math.random()*512,y=35+Math.random()*135,w=18+Math.random()*65,h=2+Math.random()*8;skyCtx.fillStyle="rgba(225,231,224,"+(.018+Math.random()*.035)+")";skyCtx.beginPath();skyCtx.ellipse(x,y,w,h,0,0,Math.PI*2);skyCtx.fill();}
 skyTex.update(false);
@@ -54,17 +54,16 @@ if(BABYLON.DefaultRenderingPipeline){
 }
 // Bright, neutral daylight: these are the final overrides used by the scene.
 scene.imageProcessingConfiguration.toneMappingEnabled=false;
-scene.imageProcessingConfiguration.exposure=1.85;
-scene.imageProcessingConfiguration.contrast=1.02;
-scene.fogDensity=.00012;
-scene.fogColor=new BABYLON.Color3(.62,.72,.78);
-scene.clearColor=new BABYLON.Color4(.62,.72,.78,1);
-sun.intensity=2.6;
-sun.diffuse=new BABYLON.Color3(1,.97,.9);
-hemi.intensity=2.35;
-hemi.diffuse=new BABYLON.Color3(.82,.9,1);
-hemi.groundColor=new BABYLON.Color3(.72,.72,.68);
-scene.ambientColor=new BABYLON.Color3(.68,.7,.72);
+scene.imageProcessingConfiguration.exposure=2.35;
+scene.imageProcessingConfiguration.contrast=.92;
+scene.fogDensity=0;
+scene.clearColor=new BABYLON.Color4(.78,.88,.96,1);
+sun.intensity=3.0;
+sun.diffuse=new BABYLON.Color3(1,1,.96);
+hemi.intensity=2.8;
+hemi.diffuse=new BABYLON.Color3(.95,.97,1);
+hemi.groundColor=new BABYLON.Color3(.82,.82,.76);
+scene.ambientColor=new BABYLON.Color3(.82,.84,.86);
 function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
@@ -76,13 +75,18 @@ const floor=box("asphalt training yard",0,-.4,0,100,.8,100,asphalt);floor.receiv
 // Lightweight procedural surface detail: generated locally, no image downloads.
 const asphaltTexture=new BABYLON.DynamicTexture("worn asphalt texture",{width:512,height:512},scene,false);
 const asphaltCtx=asphaltTexture.getContext();
-asphaltCtx.fillStyle="#414b50";asphaltCtx.fillRect(0,0,512,512);
+asphaltCtx.fillStyle="#77858a";asphaltCtx.fillRect(0,0,512,512);
 let textureSeed=7319;
 function textureRand(){textureSeed=(textureSeed*1664525+1013904223)>>>0;return textureSeed/4294967296;}
 for(let i=0;i<11500;i++){const x=textureRand()*512,y=textureRand()*512,a=.025+textureRand()*.13,s=.5+textureRand()*2.8;asphaltCtx.fillStyle=textureRand()>.5?"rgba(210,218,214,"+a+")":"rgba(5,13,18,"+a+")";asphaltCtx.fillRect(x,y,s,s);}
 for(let i=0;i<34;i++){const x=textureRand()*512,y=textureRand()*512;asphaltCtx.strokeStyle="rgba(12,19,22,.22)";asphaltCtx.lineWidth=.7+textureRand()*1.2;asphaltCtx.beginPath();asphaltCtx.moveTo(x,y);asphaltCtx.lineTo(x+(textureRand()-.5)*45,y+textureRand()*26);asphaltCtx.stroke();}
 asphaltTexture.update(false);asphaltTexture.uScale=7;asphaltTexture.vScale=7;asphaltTexture.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;asphaltTexture.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;
-asphalt.diffuseTexture=asphaltTexture;asphalt.diffuseColor=new BABYLON.Color3(.88,.91,.93);asphalt.specularColor=new BABYLON.Color3(.055,.06,.065);
+asphalt.diffuseTexture=asphaltTexture;asphalt.diffuseColor=new BABYLON.Color3(1,1,1);asphalt.emissiveColor=new BABYLON.Color3(.24,.25,.25);asphalt.specularColor=new BABYLON.Color3(.055,.06,.065);
+concrete.emissiveColor=new BABYLON.Color3(.16,.16,.15);
+sand.emissiveColor=new BABYLON.Color3(.18,.16,.12);
+steel.emissiveColor=new BABYLON.Color3(.08,.09,.1);
+edge.emissiveColor=new BABYLON.Color3(.1,.1,.1);
+glass.emissiveColor=new BABYLON.Color3(.07,.09,.1);
 // Painted tactical lane edges, worn crossing bars and manhole details add readable scale.
 const paintMat=material("faded road paint","#c4bfae");paintMat.emissiveColor=new BABYLON.Color3(.035,.032,.025);
 const hazardMat=material("yellow hazard paint","#d2a64e");
