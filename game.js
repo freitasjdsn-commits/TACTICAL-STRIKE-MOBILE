@@ -191,15 +191,22 @@ const tracerMat=material("enemy tracer material","#ff765f");tracerMat.emissiveCo
 const enemyTracers=[];
 function enemyShot(b){const start=b.root.position.add(new BABYLON.Vector3(0,1.18,0));const target=camera.position.add(new BABYLON.Vector3(0,-.35,0));const delta=target.subtract(start);const length=delta.length();const beam=BABYLON.MeshBuilder.CreateCylinder("enemy tracer",{height:length,diameter:.035,tessellation:6},scene);beam.material=tracerMat;beam.position=start.add(target).scale(.5);beam.rotationQuaternion=BABYLON.Quaternion.FromUnitVectorsToRef?BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Axis.Y,delta.normalize(),BABYLON.Quaternion.Identity()):null;if(!beam.rotationQuaternion){beam.lookAt(target);beam.rotation.x+=Math.PI/2;}enemyTracers.push({mesh:beam,life:.12});b.muzzleGlow.isVisible=true;b.alert=.35;}
 function updateHud(){ammoEl.textContent=ammo+" / 90"}
+const hitFlashMat=material("impact flash material","#ffe6a0");hitFlashMat.emissiveColor=new BABYLON.Color3(1,.72,.28);
+const hitEffects=[];
+function spawnHitEffect(point,headshot){
+ const burst=BABYLON.MeshBuilder.CreateSphere("hit impact",{diameter:headshot?.34:.24,segments:7},scene);burst.position.copyFrom(point);burst.material=hitFlashMat;burst.isPickable=false;
+ const ring=BABYLON.MeshBuilder.CreateTorus("impact ring",{diameter:headshot?.62:.44,thickness:.035,tessellation:12},scene);ring.position.copyFrom(point);ring.material=redLight;ring.isPickable=false;
+ hitEffects.push({mesh:burst,ring,life:.2,max:.2});
+}
 function fire(){
- if(gameOver){msg.textContent="DERROTA — RECARREGUE A PÁGINA PARA JOGAR NOVAMENTE";return}
+ if(gameOver){msg.textContent="PARTIDA ENCERRADA — TOQUE EM JOGAR NOVAMENTE";return}
  if(ammo<=0){msg.textContent="SEM MUNIÇÃO — RECARREGUE";return}
  ammo--;updateHud();recoil=.13;muzzle.isVisible=true;flashTimer=.075;
  const ray=camera.getForwardRay(100);
  const hit=scene.pickWithRay(ray,m=>m.name==="enemy body"||m.name==="enemy head");
  if(hit.hit){
   const bot=bots.find(b=>b.alive&&(b.body===hit.pickedMesh||b.head===hit.pickedMesh));
-  if(bot){bot.alive=false;bot.root.setEnabled(false);score++;msg.textContent=score===bots.length?"ÁREA LIMPA — VITÓRIA":"ALVO ELIMINADO • "+score+"/"+bots.length;if(score===bots.length)finishMatch(true)}
+  if(bot){const headshot=hit.pickedMesh===bot.head;spawnHitEffect(hit.pickedPoint,headshot);bot.alive=false;bot.root.setEnabled(false);score++;msg.textContent=(headshot?"TIRO NA CABEÇA":"ALVO ELIMINADO")+" • "+score+"/"+bots.length;if(score===bots.length)finishMatch(true)}
  }else msg.textContent="DISPARO";
 }
 document.querySelector("#fire").onpointerdown=e=>{e.preventDefault();fire()};
@@ -228,10 +235,11 @@ scene.onBeforeRenderObservable.add(()=>{
  weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
  if(damageFlash>0){damageFlash-=dt;if(damageFlash<=0&&!gameOver)damageOverlay.style.opacity="0"}
- bots.forEach(b=>{if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz);let combatStrafe=0;if(dist<10&&dist>3)combatStrafe=Math.sin(b.phase*1.7)*b.strafe*(b.role===1?1.15:.55);const pace=b.role===2?.45:b.role===1?1.25:.8;b.root.position.x=b.anchorX+Math.sin(stride)*b.patrolX+combatStrafe;b.root.position.z=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.role===2&&dist<8){b.root.position.x-=dx/(dist||1)*dt*.55;b.root.position.z-=dz/(dist||1)*dt*.55;}b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;
+ bots.forEach(b=>{if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz);let combatStrafe=0;if(dist<10&&dist>3)combatStrafe=Math.sin(b.phase*1.7)*b.strafe*(b.role===1?1.15:.55);const pace=b.role===2?.45:b.role===1?1.25:.8;b.root.position.x=b.anchorX+Math.sin(stride)*b.patrolX+combatStrafe;b.root.position.z=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.role===2&&dist<8){b.root.position.x-=dx/(dist||1)*dt*.55;b.root.position.z-=dz/(dist||1)*dt*.55;}else if(b.role===1&&dist<11&&dist>5){b.root.position.x+=dx/(dist||1)*dt*.28;b.root.position.z+=dz/(dist||1)*dt*.28;}else if(b.role===0&&dist<13&&dist>4){b.root.position.x+=dx/(dist||1)*dt*.16;b.root.position.z+=dz/(dist||1)*dt*.16;}b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;
  b.attackCooldown-=dt;b.alert=Math.max(0,b.alert-dt);b.muzzleGlow.isVisible=b.alert>0;b.alertLamp.scaling.y=1+(b.alert>0?.5:0);if(dist<18&&dist>2.4&&b.attackCooldown<=0){b.attackCooldown=b.role===1?1.35:b.role===2?2.5:1.9;enemyShot(b);damagePlayer(b.role===1?7:b.role===2?13:10);}
  }});
  enemyTracers.forEach(t=>{t.life-=dt;if(t.life<=0){t.mesh.dispose();} });for(let i=enemyTracers.length-1;i>=0;i--)if(enemyTracers[i].life<=0)enemyTracers.splice(i,1);
+ hitEffects.forEach(t=>{t.life-=dt;const p=1-t.life/t.max;t.mesh.scaling.setAll(1+p*1.7);t.mesh.visibility=Math.max(0,1-p);t.ring.scaling.setAll(.5+p*1.8);t.ring.visibility=Math.max(0,1-p);});for(let i=hitEffects.length-1;i>=0;i--)if(hitEffects[i].life<=0){hitEffects[i].mesh.dispose();hitEffects[i].ring.dispose();hitEffects.splice(i,1);}
 });
 engine.runRenderLoop(()=>{try{scene.render()}catch(err){console.error(err);const m=document.querySelector("#message");if(m)m.textContent="ERRO AO RENDERIZAR: "+err.message;engine.stopRenderLoop()}});
 window.addEventListener("resize",()=>{engine.resize();engine.setSize(canvas.clientWidth,canvas.clientHeight)});
