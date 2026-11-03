@@ -23,7 +23,7 @@ const shadowGen=null;
 // Large procedural sky dome: a visible horizon and dusk-to-day atmospheric gradient.
 const skyTex=new BABYLON.DynamicTexture("overcast blue sky",{width:512,height:256},scene,false);
 const skyCtx=skyTex.getContext(),skyGrad=skyCtx.createLinearGradient(0,0,0,256);
-skyGrad.addColorStop(0,"#29475f");skyGrad.addColorStop(.48,"#7195a5");skyGrad.addColorStop(.78,"#c0b9a5");skyGrad.addColorStop(1,"#e0c9a7");
+skyGrad.addColorStop(0,"#69b8f2");skyGrad.addColorStop(.38,"#91cef5");skyGrad.addColorStop(.72,"#c8e5f5");skyGrad.addColorStop(1,"#f5e7c9");
 skyCtx.fillStyle=skyGrad;skyCtx.fillRect(0,0,512,256);
 for(let i=0;i<95;i++){const x=Math.random()*512,y=35+Math.random()*135,w=18+Math.random()*65,h=2+Math.random()*8;skyCtx.fillStyle="rgba(225,231,224,"+(.018+Math.random()*.035)+")";skyCtx.beginPath();skyCtx.ellipse(x,y,w,h,0,0,Math.PI*2);skyCtx.fill();}
 skyTex.update(false);
@@ -59,10 +59,12 @@ scene.imageProcessingConfiguration.contrast=1.02;
 scene.fogDensity=.00012;
 scene.fogColor=new BABYLON.Color3(.62,.72,.78);
 scene.clearColor=new BABYLON.Color4(.62,.72,.78,1);
-sun.intensity=2.15;
-hemi.intensity=2.0;
-hemi.groundColor=new BABYLON.Color3(.58,.6,.58);
-scene.ambientColor=new BABYLON.Color3(.52,.54,.56);
+sun.intensity=2.6;
+sun.diffuse=new BABYLON.Color3(1,.97,.9);
+hemi.intensity=2.35;
+hemi.diffuse=new BABYLON.Color3(.82,.9,1);
+hemi.groundColor=new BABYLON.Color3(.72,.72,.68);
+scene.ambientColor=new BABYLON.Color3(.68,.7,.72);
 function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
