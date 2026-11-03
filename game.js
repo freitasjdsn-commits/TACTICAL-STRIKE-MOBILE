@@ -51,6 +51,7 @@ if(BABYLON.DefaultRenderingPipeline){
  imagePipeline.sharpenEnabled=true;
  imagePipeline.sharpen.colorAmount=.22;
  imagePipeline.sharpen.edgeAmount=.18;
+ imagePipeline.imageProcessingEnabled=false;
 }
 // Bright, neutral daylight: these are the final overrides used by the scene.
 scene.imageProcessingConfiguration.toneMappingEnabled=false;
