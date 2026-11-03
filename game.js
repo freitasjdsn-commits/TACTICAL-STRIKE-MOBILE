@@ -438,7 +438,8 @@ function makeBot(x,z,i){
   }
  }
  // Carrega operadores humanoides rigged; em caso de falha, mantém o personagem de reserva.
-// Usa os operadores estilizados locais para manter a identidade visual da agente no mobile.\n// bots.forEach(b=>{rigBot(b);});
+// Prioriza personagens humanoides 3D com esqueleto e animações; mantém os modelos locais como fallback.
+bots.forEach(b=>{rigBot(b);});
 bots.forEach(b=>{
  b.root.scaling.setAll(.792);
  b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
