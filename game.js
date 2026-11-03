@@ -52,11 +52,11 @@ if(BABYLON.DefaultRenderingPipeline){
  imagePipeline.sharpen.colorAmount=.22;
  imagePipeline.sharpen.edgeAmount=.18;
 }
-scene.imageProcessingConfiguration.exposure=1.08;
-scene.imageProcessingConfiguration.contrast=1.27;
+scene.imageProcessingConfiguration.exposure=1.18;
+scene.imageProcessingConfiguration.contrast=1.14;
 scene.fogDensity=.00115;
-sun.intensity=1.06;
-hemi.intensity=.78;
+sun.intensity=1.12;
+hemi.intensity=.92;
 function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
@@ -353,8 +353,7 @@ function makeBot(x,z,i){
    const height=bounds.max.y-bounds.min.y;
    if(!Number.isFinite(height)||height<.05)throw new Error("escala inválida no modelo GLB");
    // Hierarchy bounds are WORLD coordinates; convert them back to the bot's local space.
-   // Altura local ajustada para manter aproximadamente 1,78 m após a escala aprovada (.792).
-   const fit=2.25/height;
+   const fit=4.2/height;
    const centerX=(bounds.min.x+bounds.max.x)*.5-bot.root.position.x;
    const centerY=bounds.min.y-bot.root.position.y;
    const centerZ=(bounds.min.z+bounds.max.z)*.5-bot.root.position.z;
@@ -385,11 +384,10 @@ function makeBot(x,z,i){
    if(out)out.textContent="MODELO 3D NÃO CARREGOU: "+(err&&err.message?err.message:String(err));
   }
  }
- // Ativa os modelos humanoides rigged; o boneco procedural permanece como fallback caso o GLB falhe.
+ // Mantém os personagens procedurais visíveis enquanto corrigimos a origem do carregamento GLB.
 bots.forEach(b=>{
  b.root.scaling.setAll(.792);
  b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
- rigBot(b);
 });
 
 // Weapon is positioned in world space every frame, avoiding mobile camera-parent clipping.
