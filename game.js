@@ -76,7 +76,7 @@ scene.imageProcessingConfiguration.applyByPostProcess=false;
 scene.imageProcessingConfiguration.colorCurvesEnabled=false;
 scene.imageProcessingConfiguration.colorGradingEnabled=false;
 // Keep shaded faces readable even on mobile displays with limited dynamic range.
-function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.emissiveColor=m.diffuseColor.scale(.14);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
+function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.emissiveColor=m.diffuseColor.scale(.24);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
 sand.diffuseTexture=sandTex;sand.diffuseColor=new BABYLON.Color3(.94,.91,.84);sand.specularColor=new BABYLON.Color3(.08,.075,.065);
@@ -140,7 +140,7 @@ for(let i=0;i<5;i++){
 }
 for(let i=0;i<8;i++){
  const x=(i%6-2.5)*7,z=i<6?28:-29;
- const trunk=cylinder("yard tree trunk",x,1.1,z,2.2,.34,steel);
+ const trunk=cylinder("yard tree trunk",x,1.1,z,2.2,.34,barkMat);
  const crown=BABYLON.MeshBuilder.CreateSphere("low foliage",{diameter:2.8,segments:7},scene);crown.position.set(x,2.5,z);crown.scaling.y=.78;crown.material=plant;
 }
 for(let i=0;i<9;i++){
@@ -168,9 +168,12 @@ for(const side of [-1,1]){
  box("ally boot",side*.19,.12,-.1,.34,.22,.45,black,allyRoot);
 }
 
-const foliageMat=material("olive foliage detail","#4f6848");
-const foliageLight=material("sunlit foliage","#82915c");
-const barkMat=material("tree bark","#51483b");
+const foliageMat=material("olive foliage detail","#668b45");
+const foliageLight=material("sunlit foliage","#a4bd68");
+const barkMat=material("tree bark","#76543a");
+// Foliage uses a soft self-lit response so leaves retain green color on mobile.
+[plant,leaf,foliageMat,foliageLight].forEach((m)=>{m.disableLighting=true;m.emissiveColor=m.diffuseColor.scale(.72);m.diffuseColor=m.diffuseColor.scale(1.12);});
+
 function addShrub(x,z,scale=1){
  const root=new BABYLON.TransformNode("tactical shrub",scene);root.position.set(x,0,z);root.scaling.setAll(scale);
  for(let i=0;i<5;i++){
