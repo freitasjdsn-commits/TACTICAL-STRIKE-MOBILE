@@ -327,6 +327,30 @@ function makeBot(x,z,i){
   box("assault shoulder patch",-.5,1.49,-.245,.2,.12,.035,trimMat,root);
  }
 
+ // Jett-inspired agent appearance: white high bun, swept fringe, blue-white combat suit.
+ const jettWhite=material("Jett white hair","#edf5fb",28),jettBlue=material("Jett blue suit","#3c91c9",26),jettNavy=material("Jett navy fabric","#203d59",30),jettPale=material("Jett pale armor","#dce9f2",34),jettCyan=material("Jett cyan accents","#78d9ef",22);
+ // Replace the old faction armor palette while keeping the existing animated rig and hitboxes.
+ root.getChildMeshes(false).forEach(m=>{
+  const n=m.name.toLowerCase();
+  if(n.includes("helmet")||n.includes("visor")||n.includes("goggle")||n.includes("eye protection")||n.includes("communications cup")||n.includes("jawline")||n.includes("face mask")||n.includes("optical lens")||n.includes("ear")){m.isVisible=false;m.isPickable=false;return;}
+  if(n.includes("enemy body")||n.includes("enemy arm")||n.includes("enemy leg")||n.includes("combat boot")||n.includes("thigh")||n.includes("knee")||n.includes("boot"))m.material=jettNavy;
+  else if(n.includes("chest")||n.includes("shoulder")||n.includes("armor")||n.includes("vest")||n.includes("collar")||n.includes("operator neck"))m.material=jettBlue;
+  else if(n.includes("pouch")||n.includes("harness")||n.includes("strap")||n.includes("forearm")||n.includes("elbow"))m.material=jettPale;
+  else if(n.includes("red")||n.includes("faction")||n.includes("insignia")||n.includes("stripe")||n.includes("slash")||n.includes("buckle"))m.material=jettCyan;
+ });
+ // White swept hair and the recognizable high bun silhouette.
+ const hairCap=BABYLON.MeshBuilder.CreateSphere("Jett white hair cap",{diameter:.57,segments:14},scene);hairCap.parent=root;hairCap.position.set(0,2.13,.015);hairCap.scaling.set(1.02,.62,1.02);hairCap.material=jettWhite;
+ const hairBun=BABYLON.MeshBuilder.CreateSphere("Jett high hair bun",{diameter:.38,segments:12},scene);hairBun.parent=root;hairBun.position.set(0,2.39,.12);hairBun.scaling.set(.9,1.05,.9);hairBun.material=jettWhite;
+ const fringe=BABYLON.MeshBuilder.CreateSphere("Jett swept front fringe",{diameter:.34,segments:12},scene);fringe.parent=root;fringe.position.set(-.13,2.12,-.245);fringe.scaling.set(1.15,.42,.52);fringe.rotation.z=-.28;fringe.material=jettWhite;
+ const sideLock=BABYLON.MeshBuilder.CreateSphere("Jett side hair lock",{diameter:.2,segments:10},scene);sideLock.parent=root;sideLock.position.set(.23,2.0,-.18);sideLock.scaling.set(.55,1.25,.55);sideLock.material=jettWhite;
+ // Blue sleeveless-looking chest panels and cyan agent details.
+ box("Jett blue chest jacket",0,1.31,-.285,.57,.53,.075,jettBlue,root);
+ box("Jett pale collar",0,1.62,-.255,.43,.13,.09,jettPale,root);
+ box("Jett cyan chest emblem",0,1.31,-.337,.12,.2,.025,jettCyan,root);
+ for(const side of [-1,1]){
+  box("Jett white shoulder trim",side*.47,1.49,-.19,.13,.2,.13,jettPale,root);
+  box("Jett blue wrist guard",side*.49,1.03,-.15,.24,.2,.12,jettBlue,root);
+ }
  const rifle=box("hostile rifle",.04,1.13,-.48,.15,.14,.82,black,root);rifle.rotation.x=.08;
  const barrel=box("hostile rifle barrel",.04,1.15,-.95,.055,.055,.32,edge,root);
  const muzzleGlow=box("enemy muzzle flash",.04,1.15,-1.16,.18,.18,.18,muzzleMat,root);muzzleGlow.isVisible=false;
@@ -409,7 +433,7 @@ function makeBot(x,z,i){
   }
  }
  // Carrega operadores humanoides rigged; em caso de falha, mantém o personagem de reserva.
-bots.forEach(b=>{rigBot(b);});
+// Usa os operadores estilizados locais para manter a identidade visual da agente no mobile.\n// bots.forEach(b=>{rigBot(b);});
 bots.forEach(b=>{
  b.root.scaling.setAll(.792);
  b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
