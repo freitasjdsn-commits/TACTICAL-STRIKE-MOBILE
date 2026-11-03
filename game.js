@@ -348,17 +348,29 @@ function makeBot(x,z,i){
    bot.modelMeshes=[...new Set(meshes)].filter(m=>m.getTotalVertices()>0);
    if(!bot.modelMeshes.length)throw new Error("GLB carregou, mas não contém malhas visíveis");
    bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.checkCollisions=false;});
+   // Measure every GLB bounding-box corner in modelRoot LOCAL space.
    modelRoot.computeWorldMatrix(true);
-   const bounds=modelRoot.getHierarchyBoundingVectors(true);
-   const height=bounds.max.y-bounds.min.y;
+   const inverseRoot=modelRoot.getWorldMatrix().clone();
+   inverseRoot.invert();
+   const localMin=new BABYLON.Vector3(Infinity,Infinity,Infinity);
+   const localMax=new BABYLON.Vector3(-Infinity,-Infinity,-Infinity);
+   bot.modelMeshes.forEach(mesh=>{
+    mesh.computeWorldMatrix(true);
+    const box=mesh.getBoundingInfo().boundingBox;
+    box.vectorsWorld.forEach(point=>{
+     const local=BABYLON.Vector3.TransformCoordinates(point,inverseRoot);
+     localMin.minimizeInPlace(local);
+     localMax.maximizeInPlace(local);
+    });
+   });
+   const height=localMax.y-localMin.y;
    if(!Number.isFinite(height)||height<.05)throw new Error("escala inválida no modelo GLB");
-   // Hierarchy bounds are WORLD coordinates; convert them back to the bot's local space.
-   const fit=2.25/height;
-   const centerX=(bounds.min.x+bounds.max.x)*.5-bot.root.position.x;
-   const centerY=bounds.min.y-bot.root.position.y;
-   const centerZ=(bounds.min.z+bounds.max.z)*.5-bot.root.position.z;
+   // Root scale is .792; target a final operator height of about 2.25 m.
+   const fit=2.85/height;
+   const centerX=(localMin.x+localMax.x)*.5;
+   const centerZ=(localMin.z+localMax.z)*.5;
    modelRoot.scaling.setAll(fit);
-   modelRoot.position.set(-centerX*fit,-centerY*fit,-centerZ*fit);
+   modelRoot.position.set(-centerX*fit,-localMin.y*fit,-centerZ*fit);
    modelRoot.computeWorldMatrix(true);
    bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
    bot.legacyMeshes.forEach(m=>{m.isVisible=false;m.isPickable=false;});
