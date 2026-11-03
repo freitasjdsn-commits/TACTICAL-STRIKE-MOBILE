@@ -338,7 +338,7 @@ function makeBot(x,z,i){
    const height=bounds.max.y-bounds.min.y;
    if(!Number.isFinite(height)||height<.05)throw new Error("escala inválida no modelo GLB");
    // Hierarchy bounds are WORLD coordinates; convert them back to the bot's local space.
-   const fit=2.25/height;
+   const fit=3.15/height;
    const centerX=(bounds.min.x+bounds.max.x)*.5-bot.root.position.x;
    const centerY=bounds.min.y-bot.root.position.y;
    const centerZ=(bounds.min.z+bounds.max.z)*.5-bot.root.position.z;
