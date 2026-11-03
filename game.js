@@ -480,7 +480,7 @@ weaponBox("rifle optic housing",0,.27,.02,.16,.13,.2,black);
 weaponBox("rifle optic lens",0,.27,.13,.095,.085,.018,redLight);
 
 const muzzle=weaponBox("muzzle flash",0,0,1.23,.26,.24,.1,muzzleMat);muzzle.isVisible=false;
-let ammo=30,score=0,recoil=0,flashTimer=0,health=300,gameOver=false,damageFlash=0;
+let ammo=30,reserveAmmo=90,reloadTimer=0,score=0,recoil=0,flashTimer=0,health=300,gameOver=false,damageFlash=0;
 const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message"),healthEl=document.querySelector("#health");
 const damageOverlay=document.createElement("div");damageOverlay.id="damage-overlay";damageOverlay.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:25;opacity:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(255,20,45,.72) 100%);transition:opacity .08s";document.body.appendChild(damageOverlay);
 const resultOverlay=document.createElement("div");resultOverlay.id="match-result";resultOverlay.style.cssText="position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(5,12,18,.86);backdrop-filter:blur(7px);font-family:Arial,sans-serif;text-align:center;color:#fff";
@@ -511,7 +511,9 @@ function damagePlayer(amount){if(gameOver)return;playSfx("damage");health=Math.m
 const tracerMat=material("enemy tracer material","#ff765f");tracerMat.emissiveColor=new BABYLON.Color3(1,.16,.08);
 const enemyTracers=[];
 function enemyShot(b){playSfx("enemy");if(b.playAnim){b.attackAnimLock=.6;b.playAnim("Attack",false);}const start=b.root.position.add(new BABYLON.Vector3(0,1.18,0));const target=camera.position.add(new BABYLON.Vector3(0,-.35,0));const delta=target.subtract(start);const length=delta.length();const beam=BABYLON.MeshBuilder.CreateCylinder("enemy tracer",{height:length,diameter:.035,tessellation:6},scene);beam.material=tracerMat;beam.position=start.add(target).scale(.5);beam.rotationQuaternion=BABYLON.Quaternion.FromUnitVectorsToRef?BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Axis.Y,delta.normalize(),BABYLON.Quaternion.Identity()):null;if(!beam.rotationQuaternion){beam.lookAt(target);beam.rotation.x+=Math.PI/2;}enemyTracers.push({mesh:beam,life:.12});b.muzzleGlow.isVisible=true;b.alert=.35;}
-function updateHud(){ammoEl.textContent=ammo+" / 90"}
+function updateHud(){ammoEl.textContent=ammo+" / "+reserveAmmo}
+function startReload(){if(gameOver||reloadTimer>0||ammo>=30||reserveAmmo<=0)return;reloadTimer=1.15;msg.textContent="RECARREGANDO..."}
+function completeReload(){const needed=30-ammo,loaded=Math.min(needed,reserveAmmo);ammo+=loaded;reserveAmmo-=loaded;reloadTimer=0;updateHud();playSfx("reload");msg.textContent="RECARREGADO"}
 const hitFlashMat=material("impact flash material","#ffe6a0");hitFlashMat.emissiveColor=new BABYLON.Color3(1,.72,.28);
 const hitEffects=[];
 function spawnHitEffect(point,headshot){
@@ -522,7 +524,8 @@ function spawnHitEffect(point,headshot){
 }
 function fire(){
  if(gameOver){msg.textContent="PARTIDA ENCERRADA — TOQUE EM JOGAR NOVAMENTE";return}
- if(ammo<=0){msg.textContent="SEM MUNIÇÃO — RECARREGUE";return}
+ if(reloadTimer>0){msg.textContent="RECARREGANDO...";return}
+ if(ammo<=0){if(reserveAmmo>0)startReload();else msg.textContent="SEM MUNIÇÃO — RESERVA ESGOTADA";return}
  ammo--;updateHud();playSfx("fire");recoil=.13;muzzle.isVisible=true;flashTimer=.075;
  const ray=camera.getForwardRay(100);
  const hit=scene.pickWithRay(ray,m=>m.name==="enemy body"||m.name==="enemy head"||bots.some(b=>b.alive&&b.modelMeshes.includes(m)));
@@ -532,7 +535,7 @@ function fire(){
  }else msg.textContent="DISPARO";
 }
 document.querySelector("#fire").onpointerdown=e=>{e.preventDefault();fire()};
-document.querySelector("#reload").onpointerdown=e=>{e.preventDefault();ammo=30;updateHud();playSfx("reload");msg.textContent="RECARREGADO"};
+document.querySelector("#reload").onpointerdown=e=>{e.preventDefault();startReload()};
 let jumpOffset=0,jumpTime=0;
 document.querySelector("#jump").onpointerdown=e=>{e.preventDefault();if(jumpTime<=0)jumpTime=.48};
 let move={x:0,y:0},joy=document.querySelector("#joystick"),stick=document.querySelector("#stick"),jid=null;
@@ -551,6 +554,7 @@ scene.onBeforeRenderObservable.add(()=>{
  camera.position.x=Math.max(-31,Math.min(31,camera.position.x));camera.position.z=Math.max(-31,Math.min(31,camera.position.z));
  if(jumpTime>0){jumpTime-=dt;jumpOffset=Math.sin((.48-jumpTime)/.48*Math.PI)*.72}else jumpOffset=0;
  camera.position.y=1.72+jumpOffset;
+ if(reloadTimer>0){reloadTimer=Math.max(0,reloadTimer-dt);if(reloadTimer===0)completeReload()}
  recoil=Math.max(0,recoil-dt*.5);
  const fwd=camera.getDirection(BABYLON.Axis.Z),weaponRight=camera.getDirection(BABYLON.Axis.X),up=camera.getDirection(BABYLON.Axis.Y);
  weapon.position.copyFrom(camera.position.add(weaponRight.scale(.43)).add(up.scale(-.39-recoil)).add(fwd.scale(.95)));
