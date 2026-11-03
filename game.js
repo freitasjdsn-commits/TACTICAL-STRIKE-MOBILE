@@ -20,6 +20,27 @@ camera.fov=.88;camera.minZ=.06;camera.maxZ=180;camera.inputs.clear();
 const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=.82;hemi.groundColor=new BABYLON.Color3(.2,.23,.25);
 const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.0;
 const shadowGen=null;
+// Large procedural sky dome: a visible horizon and dusk-to-day atmospheric gradient.
+const skyTex=new BABYLON.DynamicTexture("overcast blue sky",{width:512,height:256},scene,false);
+const skyCtx=skyTex.getContext(),skyGrad=skyCtx.createLinearGradient(0,0,0,256);
+skyGrad.addColorStop(0,"#29475f");skyGrad.addColorStop(.48,"#7195a5");skyGrad.addColorStop(.78,"#c0b9a5");skyGrad.addColorStop(1,"#e0c9a7");
+skyCtx.fillStyle=skyGrad;skyCtx.fillRect(0,0,512,256);
+for(let i=0;i<95;i++){const x=Math.random()*512,y=35+Math.random()*135,w=18+Math.random()*65,h=2+Math.random()*8;skyCtx.fillStyle="rgba(225,231,224,"+(.018+Math.random()*.035)+")";skyCtx.beginPath();skyCtx.ellipse(x,y,w,h,0,0,Math.PI*2);skyCtx.fill();}
+skyTex.update(false);
+const skyMat=new BABYLON.StandardMaterial("atmospheric sky",scene);skyMat.diffuseTexture=skyTex;skyMat.emissiveTexture=skyTex;skyMat.disableLighting=true;skyMat.backFaceCulling=false;skyMat.fogEnabled=false;
+const skyDome=BABYLON.MeshBuilder.CreateSphere("wide sky dome",{diameter:190,segments:20},scene);skyDome.material=skyMat;skyDome.isPickable=false;skyDome.infiniteDistance=true;
+function makeSurfaceTexture(name,base,light,dark){
+ const tex=new BABYLON.DynamicTexture(name,{width:256,height:256},scene,false),ctx=tex.getContext();
+ ctx.fillStyle=base;ctx.fillRect(0,0,256,256);
+ for(let i=0;i<5200;i++){const x=Math.random()*256,y=Math.random()*256,a=.025+Math.random()*.12;ctx.fillStyle=Math.random()>.5?light.replace("A",a.toFixed(3)):dark.replace("A",a.toFixed(3));ctx.fillRect(x,y,.5+Math.random()*2,.5+Math.random()*2);}
+ for(let y=0;y<256;y+=64){ctx.fillStyle="rgba(20,30,34,.12)";ctx.fillRect(0,y,256,2);}
+ for(let x=0;x<256;x+=64){ctx.fillStyle="rgba(235,229,210,.07)";ctx.fillRect(x,0,2,256);}
+ tex.update(false);tex.uScale=2.5;tex.vScale=2.5;tex.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;tex.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;return tex;
+}
+const concreteTex=makeSurfaceTexture("aged concrete texture","#858b89","rgba(231,232,220,A)","rgba(35,43,45,A)");
+const sandTex=makeSurfaceTexture("sandstone texture","#a49a86","rgba(245,220,177,A)","rgba(50,43,34,A)");
+concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
+sand.diffuseTexture=sandTex;sand.diffuseColor=new BABYLON.Color3(.94,.91,.84);sand.specularColor=new BABYLON.Color3(.08,.075,.065);
 // Restrained bloom gives emissive weapon lights and tracers a cleaner tactical glow.
 const glowLayer=new BABYLON.GlowLayer("subtle tactical bloom",scene,{blurKernelSize:24});
 glowLayer.intensity=.32;
@@ -39,6 +60,15 @@ for(let i=0;i<11500;i++){const x=textureRand()*512,y=textureRand()*512,a=.025+te
 for(let i=0;i<34;i++){const x=textureRand()*512,y=textureRand()*512;asphaltCtx.strokeStyle="rgba(12,19,22,.22)";asphaltCtx.lineWidth=.7+textureRand()*1.2;asphaltCtx.beginPath();asphaltCtx.moveTo(x,y);asphaltCtx.lineTo(x+(textureRand()-.5)*45,y+textureRand()*26);asphaltCtx.stroke();}
 asphaltTexture.update(false);asphaltTexture.uScale=7;asphaltTexture.vScale=7;asphaltTexture.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;asphaltTexture.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;
 asphalt.diffuseTexture=asphaltTexture;asphalt.diffuseColor=new BABYLON.Color3(.88,.91,.93);asphalt.specularColor=new BABYLON.Color3(.055,.06,.065);
+// Painted tactical lane edges, worn crossing bars and manhole details add readable scale.
+const paintMat=material("faded road paint","#c4bfae");paintMat.emissiveColor=new BABYLON.Color3(.035,.032,.025);
+const hazardMat=material("yellow hazard paint","#d2a64e");
+for(let side of [-1,1]){
+ box("long road edge marking",side*17,.012,0,.12,.018,66,paintMat);
+ for(let j=0;j<7;j++)box("crosswalk worn stripe",side*7.5,.014,-25+j*1.05,4.2,.018,.42,paintMat);
+}
+for(const z of [-12,8,27]){const drain=box("storm drain",0,.014,z,2.4,.02,.62,shadow);for(let k=-4;k<=4;k++)box("drain metal slot",k*.23,.027,z,.045,.012,.52,edge);}
+for(const x of [-28,28]){box("yellow hazard boundary",x,.016,0,.16,.02,58,hazardMat);}
 for(let i=-5;i<=5;i++){box("road lane dash",i*3.8,0,0,.045,.012,24,edge)}
 function building(x,z,w,d,h,m){
  const b=cast(box("combat building",x,h/2,z,w,h,d,m));
