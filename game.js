@@ -138,6 +138,7 @@ for(let i=0;i<5;i++){
  const x=-24+i*12;box("road barricade",x,.65,23,7,1.3,1.05,concrete);
  for(let k=-1;k<=1;k++)box("barricade reflective stripe",x+k*1.8,.68,22.45, .65,.75,.035,redLight);
 }
+const barkMat=material("tree bark","#76543a");
 for(let i=0;i<8;i++){
  const x=(i%6-2.5)*7,z=i<6?28:-29;
  const trunk=cylinder("yard tree trunk",x,1.1,z,2.2,.34,barkMat);
@@ -170,7 +171,6 @@ for(const side of [-1,1]){
 
 const foliageMat=material("olive foliage detail","#668b45");
 const foliageLight=material("sunlit foliage","#a4bd68");
-const barkMat=material("tree bark","#76543a");
 // Foliage uses a soft self-lit response so leaves retain green color on mobile.
 [plant,leaf,foliageMat,foliageLight].forEach((m)=>{m.disableLighting=true;m.emissiveColor=m.diffuseColor.scale(.72);m.diffuseColor=m.diffuseColor.scale(1.12);});
 
