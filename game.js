@@ -5,10 +5,10 @@ const engine=new BABYLON.Engine(canvas,false,{disableWebGL2Support:true, powerPr
 engine.setHardwareScalingLevel(1);
 const scene=new BABYLON.Scene(engine);
 scene.clearColor=new BABYLON.Color4(.48,.61,.68,1);
-scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.00065;scene.fogColor=new BABYLON.Color3(.48,.61,.68);
-scene.imageProcessingConfiguration.toneMappingEnabled=true;
-scene.imageProcessingConfiguration.exposure=1.12;
-scene.imageProcessingConfiguration.contrast=1.2;
+scene.fogMode=BABYLON.Scene.FOGMODE_EXP2;scene.fogDensity=.0003;scene.fogColor=new BABYLON.Color3(.48,.61,.68);
+scene.imageProcessingConfiguration.toneMappingEnabled=false;
+scene.imageProcessingConfiguration.exposure=1.42;
+scene.imageProcessingConfiguration.contrast=1.05;
 scene.imageProcessingConfiguration.vignetteEnabled=false;
 scene.imageProcessingConfiguration.vignetteWeight=.28;
 scene.imageProcessingConfiguration.vignetteStretch=.18;
@@ -17,8 +17,8 @@ scene.imageProcessingConfiguration.vignetteCameraFov=.5;
 const camera=new BABYLON.FreeCamera("player",new BABYLON.Vector3(0,1.72,-13),scene);
 scene.activeCamera=camera;
 camera.fov=.88;camera.minZ=.06;camera.maxZ=180;camera.inputs.clear();
-const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=1.18;hemi.groundColor=new BABYLON.Color3(.2,.23,.25);
-const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.35;
+const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=1.65;hemi.groundColor=new BABYLON.Color3(.42,.44,.46);scene.ambientColor=new BABYLON.Color3(.38,.4,.42);
+const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.7;
 const shadowGen=null;
 // Large procedural sky dome: a visible horizon and dusk-to-day atmospheric gradient.
 const skyTex=new BABYLON.DynamicTexture("overcast blue sky",{width:512,height:256},scene,false);
@@ -353,7 +353,7 @@ function makeBot(x,z,i){
    const height=bounds.max.y-bounds.min.y;
    if(!Number.isFinite(height)||height<.05)throw new Error("escala inválida no modelo GLB");
    // Hierarchy bounds are WORLD coordinates; convert them back to the bot's local space.
-   const fit=4.2/height;
+   const fit=2.25/height;
    const centerX=(bounds.min.x+bounds.max.x)*.5-bot.root.position.x;
    const centerY=bounds.min.y-bot.root.position.y;
    const centerZ=(bounds.min.z+bounds.max.z)*.5-bot.root.position.z;
@@ -384,7 +384,8 @@ function makeBot(x,z,i){
    if(out)out.textContent="MODELO 3D NÃO CARREGOU: "+(err&&err.message?err.message:String(err));
   }
  }
- // Mantém os personagens procedurais visíveis enquanto corrigimos a origem do carregamento GLB.
+ // Carrega operadores humanoides rigged; em caso de falha, mantém o personagem de reserva.
+bots.forEach(b=>{rigBot(b);});
 bots.forEach(b=>{
  b.root.scaling.setAll(.792);
  b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
