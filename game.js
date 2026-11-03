@@ -353,7 +353,8 @@ function makeBot(x,z,i){
    const height=bounds.max.y-bounds.min.y;
    if(!Number.isFinite(height)||height<.05)throw new Error("escala inválida no modelo GLB");
    // Hierarchy bounds are WORLD coordinates; convert them back to the bot's local space.
-   const fit=4.2/height;
+   // Altura local ajustada para manter aproximadamente 1,78 m após a escala aprovada (.792).
+   const fit=2.25/height;
    const centerX=(bounds.min.x+bounds.max.x)*.5-bot.root.position.x;
    const centerY=bounds.min.y-bot.root.position.y;
    const centerZ=(bounds.min.z+bounds.max.z)*.5-bot.root.position.z;
@@ -384,10 +385,11 @@ function makeBot(x,z,i){
    if(out)out.textContent="MODELO 3D NÃO CARREGOU: "+(err&&err.message?err.message:String(err));
   }
  }
- // Use the guaranteed visible in-scene operators; enlarge the complete character hierarchy.
+ // Ativa os modelos humanoides rigged; o boneco procedural permanece como fallback caso o GLB falhe.
 bots.forEach(b=>{
  b.root.scaling.setAll(.792);
  b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
+ rigBot(b);
 });
 
 // Weapon is positioned in world space every frame, avoiding mobile camera-parent clipping.
