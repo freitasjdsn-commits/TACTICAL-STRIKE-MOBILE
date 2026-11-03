@@ -122,8 +122,22 @@ function makeBot(x,z,i){
  box("enemy shoulder armor left",-.49,1.48,-.015,role===2?.38:.3,.25,.38,roleMat,root);
  box("enemy shoulder armor right",.49,1.48,-.015,role===2?.38:.3,.25,.38,roleMat,root);
  box("enemy back radio pack",0,1.35,.27,.48,.58,.22,steel,root);
- box("enemy radio antenna",.18,1.83,.3,.035,.48,.035,edge,root);
+ box("enemy radio antenna",.18,1.83,.3,.035,role===1?.72:.48,.035,edge,root);
  box("enemy chest insignia",0,1.32,-.29,.13,.19,.035,edge,root);
+ if(role===1){
+  const goggles=box("recon tactical goggles",0,1.99,-.29,.42,.12,.08,material("recon lens "+i,"#65b6bd",12,.5),root);
+  box("recon helmet side sensor",-.29,2.08,0,.13,.17,.2,edge,root);
+  box("recon thigh utility pouch",-.27,.55,-.12,.2,.28,.16,trimMat,root);
+ }else if(role===2){
+  box("heavy chest reinforcement",0,1.18,-.31,.62,.24,.09,steel,root);
+  box("heavy helmet brow",0,2.13,-.27,.48,.13,.12,black,root);
+  box("heavy shoulder plate left",-.57,1.52,-.02,.4,.34,.42,trimMat,root);
+  box("heavy shoulder plate right",.57,1.52,-.02,.4,.34,.42,trimMat,root);
+  box("heavy back armor",0,1.35,.39,.58,.68,.22,roleMat,root);
+ }else{
+  box("assault helmet stripe",0,2.22,-.255,.09,.035,.025,edge,root);
+  box("assault chest magazine",.12,1.42,-.3,.14,.22,.06,black,root);
+ }
  box("ammo pouch left",-.24,1.0,-.25,.16,.22,.12,black,root);box("ammo pouch right",.24,1.0,-.25,.16,.22,.12,black,root);
  const head=cast(BABYLON.MeshBuilder.CreateSphere("enemy head",{diameter:.43,segments:12},scene));head.parent=root;head.position.y=1.91;head.material=skin;
  const helmet=BABYLON.MeshBuilder.CreateSphere("enemy helmet",{diameter:.55,segments:12},scene);helmet.parent=root;helmet.position.y=2.09;helmet.scaling.y=.48;helmet.material=trimMat;
@@ -133,8 +147,9 @@ function makeBot(x,z,i){
   const arm=cast(BABYLON.MeshBuilder.CreateCapsule("enemy arm",{height:.78,radius:.14},scene));arm.parent=root;arm.position.set(side*.48,1.2,-.01);arm.rotation.z=side*.22;arm.material=role===1?roleMat:uniform;limbs.push(arm);
   const glove= BABYLON.MeshBuilder.CreateSphere("combat glove",{diameter:.29,segments:8},scene);glove.parent=root;glove.position.set(side*.51,.84,-.03);glove.material=black;
   const leg=cast(BABYLON.MeshBuilder.CreateCapsule("enemy leg",{height:.88,radius:.17},scene));leg.parent=root;leg.position.set(side*.2,.43,0);leg.material=role===2?roleMat:rubber;limbs.push(leg);
-  box("enemy knee pad",side*.2,.43,-.19,.29,.22,.12,red,root);
-  box("enemy forearm guard",side*.48,1.05,-.13,.25,.3,.12,edge,root);
+  box("enemy knee pad",side*.2,.43,-.19,role===2?.34:.29,role===2?.28:.22,.12,role===2?trimMat:red,root);
+  box("enemy forearm guard",side*.48,1.05,-.13,role===2?.31:.25,role===2?.36:.3,.12,roleMat,root);
+  if(role===1)box("recon wrist device",side*.48,.98,-.2,.22,.12,.08,edge,root);
   const boot=box("combat boot",side*.2,.12,-.11,.35,.22,.52,black,root);
   box("boot red stripe",side*.2,.13,-.38,.22,.055,.025,redLight,root);
  }
