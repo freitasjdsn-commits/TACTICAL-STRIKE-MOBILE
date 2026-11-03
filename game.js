@@ -155,7 +155,9 @@ function makeBot(x,z,i){
  }
  const rifle=box("hostile rifle",.04,1.13,-.48,.15,.14,.82,black,root);rifle.rotation.x=.08;
  const barrel=box("hostile rifle barrel",.04,1.15,-.95,.055,.055,.32,edge,root);
- bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1});
+ const muzzleGlow=box("enemy muzzle flash",.04,1.15,-1.16,.18,.18,.18,muzzleMat,root);muzzleGlow.isVisible=false;
+ const alertLamp=box("enemy alert light",0,1.58,-.31,.1,.08,.035,trimMat,root);
+ bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,rifle,muzzleGlow,alertLamp,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1,alert:0,attackCooldown:1.5+i*.23,walkPhase:0});
 }
 [[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
 // Weapon is positioned in world space every frame, avoiding mobile camera-parent clipping.
@@ -176,6 +178,9 @@ const muzzleMat=material("muzzle flash material","#ffd477");muzzleMat.emissiveCo
 const muzzle=weaponBox("muzzle flash",0,0,1.23,.26,.24,.1,muzzleMat);muzzle.isVisible=false;
 let ammo=30,score=0,recoil=0,flashTimer=0;
 const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message");
+const tracerMat=material("enemy tracer material","#ff765f");tracerMat.emissiveColor=new BABYLON.Color3(1,.16,.08);
+const enemyTracers=[];
+function enemyShot(b){const start=b.root.position.add(new BABYLON.Vector3(0,1.18,0));const target=camera.position.add(new BABYLON.Vector3(0,-.35,0));const delta=target.subtract(start);const length=delta.length();const beam=BABYLON.MeshBuilder.CreateCylinder("enemy tracer",{height:length,diameter:.035,tessellation:6},scene);beam.material=tracerMat;beam.position=start.add(target).scale(.5);beam.rotationQuaternion=BABYLON.Quaternion.FromUnitVectorsToRef?BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Axis.Y,delta.normalize(),BABYLON.Quaternion.Identity()):null;if(!beam.rotationQuaternion){beam.lookAt(target);beam.rotation.x+=Math.PI/2;}enemyTracers.push({mesh:beam,life:.12});b.muzzleGlow.isVisible=true;b.alert=.35;}
 function updateHud(){ammoEl.textContent=ammo+" / 90"}
 function fire(){
  if(ammo<=0){msg.textContent="SEM MUNIÇÃO — RECARREGUE";return}
@@ -212,7 +217,10 @@ scene.onBeforeRenderObservable.add(()=>{
  weapon.position.copyFrom(camera.position.add(weaponRight.scale(.43)).add(up.scale(-.39-recoil)).add(fwd.scale(.95)));
  weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
- bots.forEach(b=>{if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz);let combatStrafe=0;if(dist<10&&dist>3)combatStrafe=Math.sin(b.phase*1.7)*b.strafe*(b.role===1?1.15:.55);const pace=b.role===2?.45:b.role===1?1.25:.8;b.root.position.x=b.anchorX+Math.sin(stride)*b.patrolX+combatStrafe;b.root.position.z=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.role===2&&dist<8){b.root.position.x-=dx/(dist||1)*dt*.55;b.root.position.z-=dz/(dist||1)*dt*.55;}b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;}});
+ bots.forEach(b=>{if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz);let combatStrafe=0;if(dist<10&&dist>3)combatStrafe=Math.sin(b.phase*1.7)*b.strafe*(b.role===1?1.15:.55);const pace=b.role===2?.45:b.role===1?1.25:.8;b.root.position.x=b.anchorX+Math.sin(stride)*b.patrolX+combatStrafe;b.root.position.z=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.role===2&&dist<8){b.root.position.x-=dx/(dist||1)*dt*.55;b.root.position.z-=dz/(dist||1)*dt*.55;}b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;
+ b.attackCooldown-=dt;b.alert=Math.max(0,b.alert-dt);b.muzzleGlow.isVisible=b.alert>0;b.alertLamp.scaling.y=1+(b.alert>0?.5:0);if(dist<18&&dist>2.4&&b.attackCooldown<=0){b.attackCooldown=b.role===1?1.35:b.role===2?2.5:1.9;enemyShot(b);}
+ }});
+ enemyTracers.forEach(t=>{t.life-=dt;if(t.life<=0){t.mesh.dispose();} });for(let i=enemyTracers.length-1;i>=0;i--)if(enemyTracers[i].life<=0)enemyTracers.splice(i,1);
 });
 engine.runRenderLoop(()=>{try{scene.render()}catch(err){console.error(err);const m=document.querySelector("#message");if(m)m.textContent="ERRO AO RENDERIZAR: "+err.message;engine.stopRenderLoop()}});
 window.addEventListener("resize",()=>{engine.resize();engine.setSize(canvas.clientWidth,canvas.clientHeight)});
