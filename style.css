@@ -103,3 +103,7 @@ header,#mission,#crosshair,#weapon-overlay,#hud,#joystick,#actions{z-index:5}
 @media(orientation:landscape){
   #actions{right:5%;bottom:13%}
 }
+
+/* Analógico menor para liberar espaço na tela */
+#joystick{width:clamp(88px,22vw,140px)!important;height:clamp(88px,22vw,140px)!important}
+#stick{width:36px!important;height:36px!important;margin:-18px 0 0 -18px!important}
