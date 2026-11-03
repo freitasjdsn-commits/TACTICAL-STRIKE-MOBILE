@@ -480,7 +480,7 @@ weaponBox("rifle optic housing",0,.27,.02,.16,.13,.2,black);
 weaponBox("rifle optic lens",0,.27,.13,.095,.085,.018,redLight);
 
 const muzzle=weaponBox("muzzle flash",0,0,1.23,.26,.24,.1,muzzleMat);muzzle.isVisible=false;
-let ammo=30,reserveAmmo=90,reloadTimer=0,score=0,combatPoints=0,killStreak=0,bestStreak=0,streakTimer=0,recoil=0,flashTimer=0,health=300,gameOver=false,damageFlash=0;
+let ammo=30,reserveAmmo=90,reloadTimer=0,score=0,combatPoints=0,killStreak=0,bestStreak=0,streakTimer=0,recoil=0,flashTimer=0,health=300,gameOver=false,damageFlash=0,shotsFired=0,hitsLanded=0,headshots=0;
 const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message"),healthEl=document.querySelector("#health");
 const damageOverlay=document.createElement("div");damageOverlay.id="damage-overlay";damageOverlay.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:25;opacity:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(255,20,45,.72) 100%);transition:opacity .08s";document.body.appendChild(damageOverlay);
 const resultOverlay=document.createElement("div");resultOverlay.id="match-result";resultOverlay.style.cssText="position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(5,12,18,.86);backdrop-filter:blur(7px);font-family:Arial,sans-serif;text-align:center;color:#fff";
@@ -505,7 +505,7 @@ function playSfx(kind){
  }catch(e){}
 }
 audioButton.addEventListener("click",()=>{audioMuted=!audioMuted;audioButton.textContent=audioMuted?"SOM OFF":"SOM ON";audioButton.setAttribute("aria-pressed",String(!audioMuted));if(!audioMuted)playSfx("reload");});
-function finishMatch(won){if(gameOver)return;gameOver=true;msg.textContent=won?"ÁREA LIMPA — VITÓRIA":"DERROTA — VOCÊ FOI ELIMINADO";document.querySelector("#result-title").textContent=won?"VITÓRIA":"DERROTA";document.querySelector("#result-title").style.color=won?"#8df0b0":"#ff6378";document.querySelector("#result-detail").textContent="ALVOS: "+score+"/"+bots.length+" • PONTUAÇÃO: "+combatPoints+" • MELHOR SÉRIE: "+bestStreak+(won?" • ÁREA SEGURA":" • OPERADOR ELIMINADO");resultOverlay.style.display="flex";if(!won)damageOverlay.style.opacity="1";}
+function finishMatch(won){if(gameOver)return;gameOver=true;msg.textContent=won?"ÁREA LIMPA — VITÓRIA":"DERROTA — VOCÊ FOI ELIMINADO";document.querySelector("#result-title").textContent=won?"VITÓRIA":"DERROTA";document.querySelector("#result-title").style.color=won?"#8df0b0":"#ff6378";document.querySelector("#result-detail").textContent="ALVOS: "+score+"/"+bots.length+" • PONTUAÇÃO: "+combatPoints+" • MELHOR SÉRIE: "+bestStreak+" • PRECISÃO: "+(shotsFired?Math.round(hitsLanded/shotsFired*100):0)+"% • HEADSHOTS: "+headshots+(won?" • ÁREA SEGURA":" • OPERADOR ELIMINADO");resultOverlay.style.display="flex";if(!won)damageOverlay.style.opacity="1";}
 function updateHealth(){healthEl.textContent="♥ "+health;healthEl.style.color=health<=30?"#ff536b":health<=60?"#ffd477":"#8df0b0";}
 function damagePlayer(amount){if(gameOver)return;playSfx("damage");health=Math.max(0,health-amount);updateHealth();damageFlash=.22;damageOverlay.style.opacity=".9";msg.textContent="VOCÊ FOI ATINGIDO • -"+amount+" HP";if(health<=0)finishMatch(false);}
 const tracerMat=material("enemy tracer material","#ff765f");tracerMat.emissiveColor=new BABYLON.Color3(1,.16,.08);
@@ -526,12 +526,12 @@ function fire(){
  if(gameOver){msg.textContent="PARTIDA ENCERRADA — TOQUE EM JOGAR NOVAMENTE";return}
  if(reloadTimer>0){msg.textContent="RECARREGANDO...";return}
  if(ammo<=0){if(reserveAmmo>0)startReload();else msg.textContent="SEM MUNIÇÃO — RESERVA ESGOTADA";return}
- ammo--;updateHud();playSfx("fire");recoil=.13;muzzle.isVisible=true;flashTimer=.075;
+ ammo--;shotsFired++;updateHud();playSfx("fire");recoil=.13;muzzle.isVisible=true;flashTimer=.075;
  const ray=camera.getForwardRay(100);
  const hit=scene.pickWithRay(ray,m=>m.name==="enemy body"||m.name==="enemy head"||bots.some(b=>b.alive&&b.modelMeshes.includes(m)));
  if(hit.hit){
   const bot=bots.find(b=>b.alive&&(b.body===hit.pickedMesh||b.head===hit.pickedMesh||b.modelMeshes.includes(hit.pickedMesh)));
-  if(bot){const headshot=hit.pickedMesh===bot.head;const damage=headshot?bot.maxHp:50;bot.hp=Math.max(0,bot.hp-damage);combatPoints+=headshot?150:25;spawnHitEffect(hit.pickedPoint,headshot);if(bot.hp<=0){bot.alive=false;bot.deathTimer=1.6;if(bot.playAnim)bot.playAnim("Death",false);else bot.root.setEnabled(false);score++;if(!headshot)combatPoints+=75;killStreak++;bestStreak=Math.max(bestStreak,killStreak);streakTimer=5;const streakBonus=killStreak>=2?killStreak*25:0;combatPoints+=streakBonus;msg.textContent=(headshot?"HEADSHOT":"ALVO ELIMINADO")+" • "+score+"/"+bots.length+" • SÉRIE x"+killStreak+(streakBonus?" +"+streakBonus+" BÔNUS":"")+" • "+combatPoints+" PTS";if(score===bots.length)finishMatch(true)}else{msg.textContent=(headshot?"TIRO NA CABEÇA":"ACERTO")+" • +25 PTS • "+damage+" DANO • INIMIGO "+bot.hp+"/"+bot.maxHp+" HP";} }
+  if(bot){hitsLanded++;const headshot=hit.pickedMesh===bot.head;if(headshot)headshots++;const damage=headshot?bot.maxHp:50;bot.hp=Math.max(0,bot.hp-damage);combatPoints+=headshot?150:25;spawnHitEffect(hit.pickedPoint,headshot);if(bot.hp<=0){bot.alive=false;bot.deathTimer=1.6;if(bot.playAnim)bot.playAnim("Death",false);else bot.root.setEnabled(false);score++;if(!headshot)combatPoints+=75;killStreak++;bestStreak=Math.max(bestStreak,killStreak);streakTimer=5;const streakBonus=killStreak>=2?killStreak*25:0;combatPoints+=streakBonus;msg.textContent=(headshot?"HEADSHOT":"ALVO ELIMINADO")+" • "+score+"/"+bots.length+" • SÉRIE x"+killStreak+(streakBonus?" +"+streakBonus+" BÔNUS":"")+" • "+combatPoints+" PTS";if(score===bots.length)finishMatch(true)}else{msg.textContent=(headshot?"TIRO NA CABEÇA":"ACERTO")+" • +25 PTS • "+damage+" DANO • INIMIGO "+bot.hp+"/"+bot.maxHp+" HP";} }
  }else msg.textContent="DISPARO";
 }
 document.querySelector("#fire").onpointerdown=e=>{e.preventDefault();fire()};
