@@ -267,6 +267,31 @@ function makeBot(x,z,i){
  box("upper back equipment panel",0,1.48,.405,.36,.3,.08,black,root);
  box("radio screen",.12,1.52,.455,.12,.13,.025,glass,root);
 
+ // Hero-shooter inspired silhouette and faction identity: layered collar, shoulder emblems and luminous tech accents.
+ roleMat.specularColor=new BABYLON.Color3(.24,.25,.27);roleMat.specularPower=34;
+ trimMat.specularColor=new BABYLON.Color3(.42,.34,.3);trimMat.specularPower=42;
+ const collar=BABYLON.MeshBuilder.CreateTorus("armored neck collar",{diameter:.43,thickness:.075,tessellation:12},scene);
+ collar.parent=root;collar.position.set(0,1.67,-.015);collar.rotation.x=Math.PI/2;collar.material=black;
+ for(const side of [-1,1]){
+  const emblem=BABYLON.MeshBuilder.CreateCylinder("faction shoulder insignia",{height:.045,diameter:.24,tessellation:6},scene);
+  emblem.parent=root;emblem.position.set(side*.49,1.49,-.235);emblem.rotation.x=Math.PI/2;emblem.material=trimMat;
+  box("shoulder armor luminous slash",side*.49,1.51,-.274,.055,.2,.025,role===1?edge:trimMat,root).rotation.z=side*.22;
+  box("upper arm utility strap",side*.48,1.18,-.13,.29,.075,.12,black,root);
+  box("glove knuckle plate",side*.51,.84,-.16,.19,.075,.08,trimMat,root);
+ }
+ // Role-specific helmet profiles make enemy classes readable at a glance.
+ if(role===1){
+  const sensor=BABYLON.MeshBuilder.CreateSphere("recon helmet sensor", {diameter:.16,segments:8},scene);
+  sensor.parent=root;sensor.position.set(.2,2.27,.02);sensor.material=trimMat;
+  box("recon shoulder antenna housing",-.52,1.57,.03,.16,.23,.2,black,root);
+ }else if(role===2){
+  box("heavy helmet armored crest",0,2.29,.015,.32,.12,.35,steel,root);
+  box("heavy chest power core",0,1.32,-.355,.18,.18,.035,trimMat,root);
+ }else{
+  box("assault helmet ridge",0,2.27,.02,.16,.07,.29,edge,root);
+  box("assault shoulder patch",-.5,1.49,-.245,.2,.12,.035,trimMat,root);
+ }
+
  const rifle=box("hostile rifle",.04,1.13,-.48,.15,.14,.82,black,root);rifle.rotation.x=.08;
  const barrel=box("hostile rifle barrel",.04,1.15,-.95,.055,.055,.32,edge,root);
  const muzzleGlow=box("enemy muzzle flash",.04,1.15,-1.16,.18,.18,.18,muzzleMat,root);muzzleGlow.isVisible=false;
