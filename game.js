@@ -65,6 +65,13 @@ hemi.intensity=3.4;
 hemi.diffuse=new BABYLON.Color3(1,1,1);
 hemi.groundColor=new BABYLON.Color3(.92,.91,.86);
 scene.ambientColor=new BABYLON.Color3(1,1,1);
+scene.fogMode=BABYLON.Scene.FOGMODE_NONE;
+hemi.intensity=5.2;
+sun.intensity=4.8;
+scene.environmentIntensity=1.8;
+scene.imageProcessingConfiguration.exposure=3.0;
+scene.imageProcessingConfiguration.contrast=.88;
+
 scene.imageProcessingConfiguration.applyByPostProcess=false;
 scene.imageProcessingConfiguration.colorCurvesEnabled=false;
 scene.imageProcessingConfiguration.colorGradingEnabled=false;
@@ -389,6 +396,15 @@ function makeBot(x,z,i){
    bot.modelMeshes=[...new Set(meshes)].filter(m=>m.getTotalVertices()>0);
    if(!bot.modelMeshes.length)throw new Error("GLB carregou, mas não contém malhas visíveis");
    bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.checkCollisions=false;});
+    bot.modelMeshes.forEach(mesh=>{
+     const mat=mesh.material;
+     if(mat){
+      mat.disableLighting=false;
+      if(mat.albedoColor&&mat.emissiveColor){mat.emissiveColor=mat.albedoColor.scale(.28);}
+      else if(mat.diffuseColor&&mat.emissiveColor){mat.emissiveColor=mat.diffuseColor.scale(.28);}
+     }
+    });
+
    // Measure every GLB bounding-box corner in modelRoot LOCAL space.
    modelRoot.computeWorldMatrix(true);
    const inverseRoot=modelRoot.getWorldMatrix().clone();
