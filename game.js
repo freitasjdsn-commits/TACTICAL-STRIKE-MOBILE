@@ -159,34 +159,6 @@ function addFacadeDetails(x,z,w,d,h){
 }
 [[-27,7,1.1],[-26,15,.85],[26,8,1.1],[27,17,.9],[-23,-10,.8],[24,-11,.9],[-12,29,.8],[13,29,.9]].forEach(v=>addShrub(v[0],v[1],v[2]));
 [[-20,12,13,13,9], [20,13,14,13,10],[-21,-17,13,13,8],[21,-17,14,13,9],[0,33,22,10,7]].forEach(v=>addFacadeDetails(...v));
-function addIndustrialDetails(x,z,w,d,h,index){
- const front=z-d/2-.22;
- // External service pipes and cable trays give the building faces a layered industrial silhouette.
- for(const side of [-1,1]){
-  const px=x+side*(w/2-.65);
-  cylinder("building service pipe",px,h*.48,front,.18,.14,steel);
-  for(const yy of [1.1,3.4,h-.7])box("pipe wall clamp",px,yy,front,.28,.09,.2,edge);
-  box("upper cable tray",x+side*w*.18,h-.42,front-.12,Math.max(2,w*.34),.13,.2,shadow);
- }
- // Air-conditioning units, louvers and warning panels are deliberately kept above the combat lane.
- for(let j=0;j<2;j++){
-  const ax=x+(j?1:-1)*w*.23, ay=h*.68;
-  box("industrial air conditioner",ax,ay,front-.28,1.15,.72,.48,steel);
-  box("air conditioner vent",ax,ay,front-.54,.78,.42,.035,shadow);
-  for(let k=-2;k<=2;k++)box("vent slat",ax+k*.14,ay,front-.57,.035,.34,.025,edge);
-  box("ac status light",ax+.39,ay+.22,front-.58,.07,.06,.025,redLight);
- }
- const signMat=material("facility signage "+index,"#263e49");
- const signX=x+w*.23;
- box("facility sign plate",signX,2.25,front-.18,2.0,.62,.08,signMat);
- box("facility sign stripe",signX,2.47,front-.23,1.55,.055,.025,hazardMat);
- box("facility sign lower line",signX,2.08,front-.23,1.05,.045,.025,edge);
- for(let j=0;j<3;j++)box("loading dock bumper",x-w*.25+j*.48,.42,front-.3,.18,.8,.22,rubber);
- box("loading dock canopy",x,3.15,front-.62,w*.62,.16,1.05,steel);
- for(let j=-1;j<=1;j++)box("canopy support",x+j*w*.25,1.65,front-1.0,.09,3.0,.09,edge);
-}
-[[-20,12,13,13,9],[20,13,14,13,10],[-21,-17,13,13,8],[21,-17,14,13,9],[0,33,22,10,7]].forEach((v,i)=>addIndustrialDetails(...v,i));
-
 const muzzleMat=material("muzzle flash material","#ffd477");muzzleMat.emissiveColor=new BABYLON.Color3(1,.55,.12);
 const bots=[];
 function makeBot(x,z,i){
