@@ -30,12 +30,12 @@ skyTex.update(false);
 const skyMat=new BABYLON.StandardMaterial("atmospheric sky",scene);skyMat.diffuseTexture=skyTex;skyMat.emissiveTexture=skyTex;skyMat.disableLighting=true;skyMat.backFaceCulling=false;skyMat.fogEnabled=false;
 const skyDome=BABYLON.MeshBuilder.CreateSphere("wide sky dome",{diameter:190,segments:20},scene);skyDome.material=skyMat;skyDome.isPickable=false;skyDome.infiniteDistance=true;
 function makeSurfaceTexture(name,base,light,dark){
- const tex=new BABYLON.DynamicTexture(name,{width:256,height:256},scene,false),ctx=tex.getContext();
- ctx.fillStyle=base;ctx.fillRect(0,0,256,256);
- for(let i=0;i<5200;i++){const x=Math.random()*256,y=Math.random()*256,a=.025+Math.random()*.12;ctx.fillStyle=Math.random()>.5?light.replace("A",a.toFixed(3)):dark.replace("A",a.toFixed(3));ctx.fillRect(x,y,.5+Math.random()*2,.5+Math.random()*2);}
- for(let y=0;y<256;y+=64){ctx.fillStyle="rgba(20,30,34,.12)";ctx.fillRect(0,y,256,2);}
- for(let x=0;x<256;x+=64){ctx.fillStyle="rgba(235,229,210,.07)";ctx.fillRect(x,0,2,256);}
- tex.update(false);tex.uScale=2.5;tex.vScale=2.5;tex.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;tex.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;return tex;
+ const tex=new BABYLON.DynamicTexture(name,{width:512,height:512},scene,false),ctx=tex.getContext();
+ ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
+ for(let i=0;i<14500;i++){const x=Math.random()*512,y=Math.random()*512,a=.025+Math.random()*.12;ctx.fillStyle=Math.random()>.5?light.replace("A",a.toFixed(3)):dark.replace("A",a.toFixed(3));ctx.fillRect(x,y,.5+Math.random()*2,.5+Math.random()*2);}
+ for(let y=0;y<512;y+=128){ctx.fillStyle="rgba(20,30,34,.12)";ctx.fillRect(0,y,256,2);}
+ for(let x=0;x<512;x+=128){ctx.fillStyle="rgba(235,229,210,.07)";ctx.fillRect(x,0,2,256);}
+ tex.update(false);tex.anisotropicFilteringLevel=4;tex.uScale=2.5;tex.vScale=2.5;tex.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;tex.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;return tex;
 }
 const concreteTex=makeSurfaceTexture("aged concrete texture","#858b89","rgba(231,232,220,A)","rgba(35,43,45,A)");
 const sandTex=makeSurfaceTexture("sandstone texture","#a49a86","rgba(245,220,177,A)","rgba(50,43,34,A)");
@@ -49,8 +49,8 @@ if(BABYLON.DefaultRenderingPipeline){
  imagePipeline.samples=1;
  imagePipeline.fxaaEnabled=true;
  imagePipeline.sharpenEnabled=true;
- imagePipeline.sharpen.colorAmount=.22;
- imagePipeline.sharpen.edgeAmount=.18;
+ imagePipeline.sharpen.colorAmount=.3;
+ imagePipeline.sharpen.edgeAmount=.24;
  imagePipeline.imageProcessingEnabled=false;
 }
 // Bright, neutral daylight: these are the final overrides used by the scene.
@@ -85,14 +85,14 @@ function cylinder(n,x,y,z,h,d,m,parent){const o=BABYLON.MeshBuilder.CreateCylind
 function cast(o){return o}
 const floor=box("asphalt training yard",0,-.4,0,100,.8,100,asphalt);floor.receiveShadows=true;
 // Lightweight procedural surface detail: generated locally, no image downloads.
-const asphaltTexture=new BABYLON.DynamicTexture("worn asphalt texture",{width:512,height:512},scene,false);
+const asphaltTexture=new BABYLON.DynamicTexture("worn asphalt texture",{width:1024,height:1024},scene,false);
 const asphaltCtx=asphaltTexture.getContext();
-asphaltCtx.fillStyle="#77858a";asphaltCtx.fillRect(0,0,512,512);
+asphaltCtx.fillStyle="#77858a";asphaltCtx.fillRect(0,0,1024,1024);
 let textureSeed=7319;
 function textureRand(){textureSeed=(textureSeed*1664525+1013904223)>>>0;return textureSeed/4294967296;}
-for(let i=0;i<11500;i++){const x=textureRand()*512,y=textureRand()*512,a=.025+textureRand()*.13,s=.5+textureRand()*2.8;asphaltCtx.fillStyle=textureRand()>.5?"rgba(210,218,214,"+a+")":"rgba(5,13,18,"+a+")";asphaltCtx.fillRect(x,y,s,s);}
-for(let i=0;i<34;i++){const x=textureRand()*512,y=textureRand()*512;asphaltCtx.strokeStyle="rgba(12,19,22,.22)";asphaltCtx.lineWidth=.7+textureRand()*1.2;asphaltCtx.beginPath();asphaltCtx.moveTo(x,y);asphaltCtx.lineTo(x+(textureRand()-.5)*45,y+textureRand()*26);asphaltCtx.stroke();}
-asphaltTexture.update(false);asphaltTexture.uScale=7;asphaltTexture.vScale=7;asphaltTexture.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;asphaltTexture.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;
+for(let i=0;i<26000;i++){const x=textureRand()*1024,y=textureRand()*1024,a=.025+textureRand()*.13,s=.5+textureRand()*2.8;asphaltCtx.fillStyle=textureRand()>.5?"rgba(210,218,214,"+a+")":"rgba(5,13,18,"+a+")";asphaltCtx.fillRect(x,y,s,s);}
+for(let i=0;i<52;i++){const x=textureRand()*1024,y=textureRand()*1024;asphaltCtx.strokeStyle="rgba(12,19,22,.22)";asphaltCtx.lineWidth=.7+textureRand()*1.2;asphaltCtx.beginPath();asphaltCtx.moveTo(x,y);asphaltCtx.lineTo(x+(textureRand()-.5)*45,y+textureRand()*26);asphaltCtx.stroke();}
+asphaltTexture.update(false);asphaltTexture.anisotropicFilteringLevel=4;asphaltTexture.uScale=7;asphaltTexture.vScale=7;asphaltTexture.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;asphaltTexture.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;
 asphalt.diffuseTexture=asphaltTexture;asphalt.diffuseColor=new BABYLON.Color3(1,1,1);asphalt.emissiveColor=new BABYLON.Color3(.24,.25,.25);asphalt.specularColor=new BABYLON.Color3(.055,.06,.065);
 concrete.emissiveColor=new BABYLON.Color3(.16,.16,.15);
 sand.emissiveColor=new BABYLON.Color3(.18,.16,.12);
