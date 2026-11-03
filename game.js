@@ -159,6 +159,39 @@ function addFacadeDetails(x,z,w,d,h){
 }
 [[-27,7,1.1],[-26,15,.85],[26,8,1.1],[27,17,.9],[-23,-10,.8],[24,-11,.9],[-12,29,.8],[13,29,.9]].forEach(v=>addShrub(v[0],v[1],v[2]));
 [[-20,12,13,13,9], [20,13,14,13,10],[-21,-17,13,13,8],[21,-17,14,13,9],[0,33,22,10,7]].forEach(v=>addFacadeDetails(...v));
+ // Elevated industrial catwalks, railings and a central bridge frame the A site.
+ const catwalkMat=material("catwalk dark steel","#34434b",22,.35);
+ const catwalkEdge=material("catwalk worn edges","#87949a",18,.45);
+ const hazardYellow=material("catwalk safety yellow","#d5a84f");hazardYellow.emissiveColor=new BABYLON.Color3(.08,.045,.012);
+ for(const side of [-1,1]){
+  const x=side*14.2;
+  box("elevated catwalk deck",x,4.35,5,2.65,.22,24,catwalkMat);
+  box("catwalk outer rail",x+side*1.25,4.92,5,.12,1.05,24,catwalkEdge);
+  box("catwalk inner rail",x-side*1.25,4.92,5,.12,1.05,24,catwalkEdge);
+  box("catwalk top safety stripe",x+side*1.25,5.48,5,.15,.055,24,hazardYellow);
+  for(const z of [-5,3,11,17]){
+   box("catwalk support column",x,2.12,z,.28,4.2,.3,steel);
+   box("catwalk support foot",x, .18,z,.75,.36,.75,catwalkEdge);
+  }
+  for(let z=-6;z<=16;z+=4)box("catwalk floor rib",x,4.49,z,2.55,.045,.09,catwalkEdge);
+ }
+ box("A site bridge deck",0,4.42,5,27,.2,1.9,catwalkMat);
+ for(const side of [-1,1])box("A site bridge guardrail",0,4.94,5+side*.88,27,.9,.1,catwalkEdge);
+ // Painted A-site ground marking and tactical cover.
+ const sitePaint=material("A site marking","#d9bd79");sitePaint.emissiveColor=new BABYLON.Color3(.055,.04,.018);
+ box("A site marking left stroke",-1.05,.025,5,.14,.025,2.6,sitePaint).rotation.y=-.38;
+ box("A site marking right stroke",1.05,.025,5,.14,.025,2.6,sitePaint).rotation.y=.38;
+ box("A site marking crossbar",0,.027,5.45,1.35,.025,.13,sitePaint);
+ box("A site cover barrier",0,.85,9,4.8,1.7,.8,steel);
+ for(const side of [-1,1])box("A site barrier hazard panel",side*1.45,.88,8.57,.72,.72,.045,hazardYellow);
+ const siteSignTex=new BABYLON.DynamicTexture("A site sign texture",{width:256,height:128},scene,false);
+ const siteSignCtx=siteSignTex.getContext();siteSignCtx.fillStyle="#111d25";siteSignCtx.fillRect(0,0,256,128);siteSignCtx.strokeStyle="#d5a84f";siteSignCtx.lineWidth=8;siteSignCtx.strokeRect(5,5,246,118);siteSignCtx.fillStyle="#f1d59a";siteSignCtx.font="bold 76px Arial";siteSignCtx.textAlign="center";siteSignCtx.textBaseline="middle";siteSignCtx.fillText("SITE A",128,67);siteSignTex.update(false);
+ const siteSignMat=new BABYLON.StandardMaterial("A site sign material",scene);siteSignMat.diffuseTexture=siteSignTex;siteSignMat.emissiveTexture=siteSignTex;siteSignMat.disableLighting=true;
+ const siteSign=BABYLON.MeshBuilder.CreatePlane("SITE A sign",{width:3.2,height:1.6},scene);siteSign.position.set(0,2.55,8.55);siteSign.material=siteSignMat;siteSign.isPickable=false;
+ // Low-intensity colored practical lights add depth without expensive shadows.
+ const violetLight=new BABYLON.PointLight("violet smoke bounce",new BABYLON.Vector3(-10,2.8,9),scene);violetLight.diffuse=new BABYLON.Color3(.48,.18,.85);violetLight.intensity=.42;violetLight.range=13;
+ const amberLight=new BABYLON.PointLight("A site amber practical",new BABYLON.Vector3(0,5.5,5),scene);amberLight.diffuse=new BABYLON.Color3(1,.58,.24);amberLight.intensity=.32;amberLight.range=10;
+
 const muzzleMat=material("muzzle flash material","#ffd477");muzzleMat.emissiveColor=new BABYLON.Color3(1,.55,.12);
 const bots=[];
 function makeBot(x,z,i){
