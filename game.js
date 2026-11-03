@@ -450,17 +450,26 @@ function makeBot(x,z,i){
     bot.animGroups[0].start(true);
    }
    console.info("Operador 3D carregado",bot.phase,"malhas:",bot.modelMeshes.length,"animações:",bot.animGroups.map(g=>g.name));
+   return true;
   }catch(err){
    console.warn("Falha ao carregar operador 3D",bot.phase,err);
    const out=document.querySelector("#message");
    if(out)out.textContent="MODELO 3D NÃO CARREGOU: "+(err&&err.message?err.message:String(err));
+   return false;
   }
  }
  // Carrega operadores humanoides rigged; em caso de falha, mantém o personagem de reserva.
 // Prioriza personagens humanoides 3D com esqueleto e animações; mantém os modelos locais como fallback.
-msg.textContent="CARREGANDO SOLDADOS 3D...";
-let riggedCount=0;
-bots.forEach(b=>{rigBot(b).then(()=>{if(b.modelMeshes&&b.modelMeshes.length){riggedCount++;msg.textContent="SOLDADOS 3D CARREGADOS • "+riggedCount+"/"+bots.length;} });});
+const modelStatus=document.createElement("div");
+modelStatus.id="model-load-status";
+modelStatus.textContent="SOLDADOS 3D: CARREGANDO...";
+modelStatus.style.cssText="position:fixed;z-index:45;left:50%;bottom:150px;transform:translateX(-50%);max-width:88vw;padding:8px 12px;border:1px solid #7da6b5;border-radius:9px;background:rgba(5,16,24,.92);color:#d9f5ff;font:700 11px Arial,sans-serif;letter-spacing:1px;text-align:center;pointer-events:none";
+document.body.appendChild(modelStatus);
+Promise.all(bots.map(async b=>({ok:await rigBot(b)}))).then(results=>{
+ const loaded=results.filter(x=>x.ok).length,failed=results.length-loaded;
+ modelStatus.textContent=failed===0?"SOLDADOS 3D: "+loaded+"/"+bots.length+" CARREGADOS":"SOLDADOS 3D: "+loaded+"/"+bots.length+" • FALHAS: "+failed;
+ modelStatus.style.borderColor=failed===0?"#65d6a2":"#ff7182";
+});
 bots.forEach(b=>{
  b.root.scaling.setAll(.792);
  b.legacyMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
