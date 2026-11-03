@@ -235,6 +235,38 @@ function makeBot(x,z,i){
   const boot=box("combat boot",side*.2,.12,-.11,.35,.22,.52,black,root);
   box("boot red stripe",side*.2,.13,-.38,.22,.055,.025,redLight,root);
  }
+
+ // Anatomical layers: neck, articulated-looking armor, face protection and field equipment.
+ const neck=cylinder("operator neck",0,1.69,-.015,.22,.2,skin,root);
+ const jaw=BABYLON.MeshBuilder.CreateSphere("reinforced jawline", {diameter:.31,segments:10},scene);
+ jaw.parent=root;jaw.position.set(0,1.82,-.205);jaw.scaling.set(1,.72,.72);jaw.material=skin;
+ const faceMask=box("ballistic lower face mask",0,1.82,-.285,.34,.16,.075,black,root);
+ const eyeBand=box("helmet eye protection",0,1.99,-.285,.37,.105,.055,role===1?trimMat:black,root);
+ for(const side of [-1,1]){
+  box("optical lens",side*.105,2.0,-.319,.075,.045,.018,role===1?edge:trimMat,root);
+  const ear=BABYLON.MeshBuilder.CreateCylinder("helmet communications cup",{height:.12,diameter:.22,tessellation:10},scene);
+  ear.parent=root;ear.position.set(side*.27,2.04,0);ear.rotation.z=Math.PI/2;ear.material=steel;
+  const shoulderPad=BABYLON.MeshBuilder.CreateSphere("contoured shoulder pad",{diameter:.48,segments:10},scene);
+  shoulderPad.parent=root;shoulderPad.position.set(side*.49,1.49,-.035);shoulderPad.scaling.set(1,.62,.9);shoulderPad.material=role===2?trimMat:roleMat;
+  const elbow=BABYLON.MeshBuilder.CreateSphere("articulated elbow guard",{diameter:.27,segments:8},scene);
+  elbow.parent=root;elbow.position.set(side*.49,.99,-.035);elbow.scaling.set(1,.8,.78);elbow.material=black;
+  const thigh=BABYLON.MeshBuilder.CreateBox("thigh ballistic panel",{width:.28,height:.38,depth:.13},scene);
+  thigh.parent=root;thigh.position.set(side*.2,.57,-.145);thigh.material=roleMat;
+  box("thigh webbing strap",side*.2,.69,-.22,.31,.055,.045,trimMat,root);
+  box("boot reinforced toe",side*.2,.105,-.31,.31,.12,.19,rubber,root);
+  box("boot ankle cuff",side*.2,.22,-.08,.31,.12,.3,steel,root);
+ }
+ // Chest rig gets readable pouches, straps, buckles and a protected central plate.
+ box("left shoulder harness",-.22,1.43,-.285,.075,.43,.045,black,root).rotation.z=-.18;
+ box("right shoulder harness",.22,1.43,-.285,.075,.43,.045,black,root).rotation.z=.18;
+ for(let pouch=-1;pouch<=1;pouch++){
+  box("magazine carrier",pouch*.2,1.12,-.325,.14,.22,.1,role===2?steel:black,root);
+  box("magazine retention flap",pouch*.2,1.2,-.382,.13,.055,.018,trimMat,root);
+ }
+ box("central armor buckle",0,.84,-.255,.18,.11,.045,edge,root);
+ box("upper back equipment panel",0,1.48,.405,.36,.3,.08,black,root);
+ box("radio screen",.12,1.52,.455,.12,.13,.025,glass,root);
+
  const rifle=box("hostile rifle",.04,1.13,-.48,.15,.14,.82,black,root);rifle.rotation.x=.08;
  const barrel=box("hostile rifle barrel",.04,1.15,-.95,.055,.055,.32,edge,root);
  const muzzleGlow=box("enemy muzzle flash",.04,1.15,-1.16,.18,.18,.18,muzzleMat,root);muzzleGlow.isVisible=false;
