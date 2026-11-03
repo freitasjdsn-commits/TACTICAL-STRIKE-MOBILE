@@ -371,7 +371,7 @@ function makeBot(x,z,i){
  const muzzleGlow=box("enemy muzzle flash",.04,1.15,-1.16,.18,.18,.18,muzzleMat,root);muzzleGlow.isVisible=false;
  const alertLamp=box("enemy alert light",0,1.58,-.31,.1,.08,.035,trimMat,root);
  root.scaling.setAll(role===1?1.015:role===2?1.075:.98);
- bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,rifle,muzzleGlow,alertLamp,legacyMeshes:root.getChildMeshes(false),modelMeshes:[],animGroups:[],playAnim:null,animState:"",deathTimer:0,attackAnimLock:0,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1,alert:0,attackCooldown:1.5+i*.23,walkPhase:0,combatState:"patrol",stateTimer:0});
+ bots.push({root,body:torso,head,alive:true,hp:role===2?180:role===1?120:100,maxHp:role===2?180:role===1?120:100,phase:i,role,limbs,rifle,muzzleGlow,alertLamp,legacyMeshes:root.getChildMeshes(false),modelMeshes:[],animGroups:[],playAnim:null,animState:"",deathTimer:0,attackAnimLock:0,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1,alert:0,attackCooldown:1.5+i*.23,walkPhase:0,combatState:"patrol",stateTimer:0});
 }
 [[-2,-10],[2,-9],[-2.5,-7],[2.5,-6],[0,-4],[-1.8,-2],[1.8,0]].forEach((p,i)=>makeBot(p[0],p[1],i));
  // Rigged CC0 operators: load, normalize and attach complete skinned GLB characters.
@@ -531,7 +531,7 @@ function fire(){
  const hit=scene.pickWithRay(ray,m=>m.name==="enemy body"||m.name==="enemy head"||bots.some(b=>b.alive&&b.modelMeshes.includes(m)));
  if(hit.hit){
   const bot=bots.find(b=>b.alive&&(b.body===hit.pickedMesh||b.head===hit.pickedMesh||b.modelMeshes.includes(hit.pickedMesh)));
-  if(bot){const headshot=hit.pickedMesh===bot.head;spawnHitEffect(hit.pickedPoint,headshot);bot.alive=false;bot.deathTimer=1.6;if(bot.playAnim)bot.playAnim("Death",false);else bot.root.setEnabled(false);score++;msg.textContent=(headshot?"TIRO NA CABEÇA":"ALVO ELIMINADO")+" • "+score+"/"+bots.length;if(score===bots.length)finishMatch(true)}
+  if(bot){const headshot=hit.pickedMesh===bot.head;const damage=headshot?bot.maxHp:50;bot.hp=Math.max(0,bot.hp-damage);spawnHitEffect(hit.pickedPoint,headshot);if(bot.hp<=0){bot.alive=false;bot.deathTimer=1.6;if(bot.playAnim)bot.playAnim("Death",false);else bot.root.setEnabled(false);score++;msg.textContent=(headshot?"TIRO NA CABEÇA":"ALVO ELIMINADO")+" • "+score+"/"+bots.length;if(score===bots.length)finishMatch(true)}else{msg.textContent=(headshot?"TIRO NA CABEÇA":"ACERTO")+" • "+damage+" DANO • INIMIGO "+bot.hp+"/"+bot.maxHp+" HP";} }
  }else msg.textContent="DISPARO";
 }
 document.querySelector("#fire").onpointerdown=e=>{e.preventDefault();fire()};
