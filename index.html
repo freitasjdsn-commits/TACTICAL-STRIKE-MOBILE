@@ -16,23 +16,36 @@
 (function(){
  const btn=document.getElementById("fullscreen");
  const root=document.documentElement;
- function sync(){const active=!!(document.fullscreenElement||document.webkitFullscreenElement||document.body.classList.contains("immersive"));btn.textContent=active?"⤢":"⛶";btn.setAttribute("aria-label",active?"Sair da tela cheia":"Ativar tela cheia");}
- btn.addEventListener("click",async function(){
-  const active=!!(document.fullscreenElement||document.webkitFullscreenElement||document.body.classList.contains("immersive"));
+ const body=document.body;
+ function sync(){
+  const active=!!(document.fullscreenElement||document.webkitFullscreenElement||body.classList.contains("immersive"));
+  btn.textContent=active?"⤢":"⛶";
+  btn.setAttribute("aria-label",active?"Sair da tela cheia":"Ativar tela cheia");
+  btn.setAttribute("aria-pressed",active?"true":"false");
+ }
+ btn.addEventListener("click",function(event){
+  event.preventDefault();
+  const active=body.classList.contains("immersive")||!!document.fullscreenElement||!!document.webkitFullscreenElement;
   if(active){
-   if(document.fullscreenElement&&document.exitFullscreen)await document.exitFullscreen().catch(()=>{});
-   else if(document.webkitFullscreenElement&&document.webkitExitFullscreen)document.webkitExitFullscreen();
-   document.body.classList.remove("immersive");
+   body.classList.remove("immersive");
+   if(document.fullscreenElement&&document.exitFullscreen){const p=document.exitFullscreen();if(p&&p.catch)p.catch(function(){});}
+   else if(document.webkitFullscreenElement&&document.webkitExitFullscreen){document.webkitExitFullscreen();}
   }else{
-   let entered=false;
-   try{if(root.requestFullscreen){await root.requestFullscreen();entered=!!document.fullscreenElement;}else if(root.webkitRequestFullscreen){root.webkitRequestFullscreen();entered=!!document.webkitFullscreenElement;}}catch(e){}
-   if(!entered)document.body.classList.add("immersive");
-   try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock("landscape");}catch(e){}
+   // A mudança visual é imediata e também funciona no Safari do iPhone,
+   // que normalmente não permite Fullscreen API em páginas comuns.
+   body.classList.add("immersive");
+   try{
+    if(root.requestFullscreen){const p=root.requestFullscreen();if(p&&p.catch)p.catch(function(){});}
+    else if(root.webkitRequestFullscreen){root.webkitRequestFullscreen();}
+   }catch(e){}
+   try{if(screen.orientation&&screen.orientation.lock){const p=screen.orientation.lock("landscape");if(p&&p.catch)p.catch(function(){});}}catch(e){}
   }
   sync();
+  requestAnimationFrame(function(){window.dispatchEvent(new Event("resize"));});
  });
  document.addEventListener("fullscreenchange",sync);
  document.addEventListener("webkitfullscreenchange",sync);
+ sync();
 })();
 </script><style id="controls-hotfix">
 #fullscreen{position:fixed;top:12px;right:14px;z-index:60;width:42px;height:42px;border:1px solid #8da5b2;border-radius:10px;background:#101b24dd;color:#fff;font-size:25px;line-height:1;display:grid;place-items:center;box-shadow:0 3px 12px #0009;touch-action:manipulation}
