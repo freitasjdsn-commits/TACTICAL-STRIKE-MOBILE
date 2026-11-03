@@ -307,7 +307,7 @@ function makeBot(x,z,i){
  root.scaling.setAll(role===1?1.015:role===2?1.075:.98);
  bots.push({root,body:torso,head,alive:true,phase:i,role,limbs,rifle,muzzleGlow,alertLamp,legacyMeshes:root.getChildMeshes(false),modelMeshes:[],animGroups:[],playAnim:null,animState:"",deathTimer:0,attackAnimLock:0,anchorX:x,anchorZ:z,patrolX:role===1?1.8:role===2?.75:1.15+(i%3)*.22,patrolZ:role===1?1.15:role===2?.55:.7+(i%2)*.25,decision:0,strafe:1,alert:0,attackCooldown:1.5+i*.23,walkPhase:0,combatState:"patrol",stateTimer:0});
 }
-[[-9,13],[9,15],[-15,-3],[15,-4],[0,21],[-7,-19],[9,-19]].forEach((p,i)=>makeBot(p[0],p[1],i));
+[[-6,1],[6,3],[-8,7],[8,8],[0,12],[-3,15],[3,17]].forEach((p,i)=>makeBot(p[0],p[1],i));
  // Rigged CC0 operators: load, normalize and attach complete skinned GLB characters.
  const rigUrls=[
   "https://gobkit.com/freebies/human004/Rifleman.glb",
@@ -338,7 +338,7 @@ function makeBot(x,z,i){
    const height=bounds.max.y-bounds.min.y;
    if(!Number.isFinite(height)||height<.05)throw new Error("escala inválida no modelo GLB");
    // Hierarchy bounds are WORLD coordinates; convert them back to the bot's local space.
-   const fit=3.15/height;
+   const fit=4.2/height;
    const centerX=(bounds.min.x+bounds.max.x)*.5-bot.root.position.x;
    const centerY=bounds.min.y-bot.root.position.y;
    const centerZ=(bounds.min.z+bounds.max.z)*.5-bot.root.position.z;
