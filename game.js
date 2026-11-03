@@ -117,6 +117,12 @@ function makeBot(x,z,i){
  const torso=cast(BABYLON.MeshBuilder.CreateCapsule("enemy body",{height:1.05,radius:.34,tessellation:10},scene));torso.parent=root;torso.position.y=1.16;torso.material=red;
  const vest=box("armored chest rig",0,1.2,-.025,.68,.62,.43,uniform,root);
  box("red chest plate",0,1.3,-.25,.47,.4,.055,redLight,root);
+ box("enemy tactical belt",0,.82,-.02,.68,.16,.42,black,root);
+ box("enemy shoulder armor left",-.49,1.48,-.015,.3,.25,.38,red,root);
+ box("enemy shoulder armor right",.49,1.48,-.015,.3,.25,.38,red,root);
+ box("enemy back radio pack",0,1.35,.27,.48,.58,.22,steel,root);
+ box("enemy radio antenna",.18,1.83,.3,.035,.48,.035,edge,root);
+ box("enemy chest insignia",0,1.32,-.29,.13,.19,.035,edge,root);
  box("ammo pouch left",-.24,1.0,-.25,.16,.22,.12,black,root);box("ammo pouch right",.24,1.0,-.25,.16,.22,.12,black,root);
  const head=cast(BABYLON.MeshBuilder.CreateSphere("enemy head",{diameter:.43,segments:12},scene));head.parent=root;head.position.y=1.91;head.material=skin;
  const helmet=BABYLON.MeshBuilder.CreateSphere("enemy helmet",{diameter:.55,segments:12},scene);helmet.parent=root;helmet.position.y=2.09;helmet.scaling.y=.48;helmet.material=redLight;
@@ -126,7 +132,10 @@ function makeBot(x,z,i){
   const arm=cast(BABYLON.MeshBuilder.CreateCapsule("enemy arm",{height:.78,radius:.14},scene));arm.parent=root;arm.position.set(side*.48,1.2,-.01);arm.rotation.z=side*.22;arm.material=uniform;limbs.push(arm);
   const glove= BABYLON.MeshBuilder.CreateSphere("combat glove",{diameter:.29,segments:8},scene);glove.parent=root;glove.position.set(side*.51,.84,-.03);glove.material=black;
   const leg=cast(BABYLON.MeshBuilder.CreateCapsule("enemy leg",{height:.88,radius:.17},scene));leg.parent=root;leg.position.set(side*.2,.43,0);leg.material=rubber;limbs.push(leg);
+  box("enemy knee pad",side*.2,.43,-.19,.29,.22,.12,red,root);
+  box("enemy forearm guard",side*.48,1.05,-.13,.25,.3,.12,edge,root);
   const boot=box("combat boot",side*.2,.12,-.11,.35,.22,.52,black,root);
+  box("boot red stripe",side*.2,.13,-.38,.22,.055,.025,redLight,root);
  }
  const rifle=box("hostile rifle",.04,1.13,-.48,.15,.14,.82,black,root);rifle.rotation.x=.08;
  const barrel=box("hostile rifle barrel",.04,1.15,-.95,.055,.055,.32,edge,root);
