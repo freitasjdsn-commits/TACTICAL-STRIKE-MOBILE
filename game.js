@@ -337,11 +337,15 @@ function makeBot(x,z,i){
    const bounds=modelRoot.getHierarchyBoundingVectors(true);
    const height=bounds.max.y-bounds.min.y;
    if(!Number.isFinite(height)||height<.05)throw new Error("escala inválida no modelo GLB");
-   const fit=2.05/height;
+   // Hierarchy bounds are WORLD coordinates; convert them back to the bot's local space.
+   const fit=2.25/height;
+   const centerX=(bounds.min.x+bounds.max.x)*.5-bot.root.position.x;
+   const centerY=bounds.min.y-bot.root.position.y;
+   const centerZ=(bounds.min.z+bounds.max.z)*.5-bot.root.position.z;
    modelRoot.scaling.setAll(fit);
-   modelRoot.position.x=-(bounds.min.x+bounds.max.x)*.5*fit;
-   modelRoot.position.y=-bounds.min.y*fit;
-   modelRoot.position.z=-(bounds.min.z+bounds.max.z)*.5*fit;
+   modelRoot.position.set(-centerX*fit,-centerY*fit,-centerZ*fit);
+   modelRoot.computeWorldMatrix(true);
+   bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.visibility=1;});
    bot.legacyMeshes.forEach(m=>{m.isVisible=false;m.isPickable=false;});
    bot.animGroups=instance.animationGroups||[];
    bot.playAnim=(name,loop=true)=>{
