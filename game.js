@@ -398,13 +398,13 @@ function makeBot(x,z,i){
    });
    bot.modelMeshes=[...new Set(meshes)].filter(m=>m.getTotalVertices()>0);
    if(!bot.modelMeshes.length)throw new Error("GLB carregou, mas não contém malhas visíveis");
-   bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.checkCollisions=false;});
+   bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.checkCollisions=false;try{m.enableEdgesRendering(.995);m.edgesWidth=1.15;m.edgesColor=new BABYLON.Color4(.025,.045,.065,.48);}catch(e){}});
     bot.modelMeshes.forEach(mesh=>{
      const mat=mesh.material;
      if(mat){
       mat.disableLighting=false;
-      if(mat.albedoColor&&mat.emissiveColor){mat.emissiveColor=mat.albedoColor.scale(.28);}
-      else if(mat.diffuseColor&&mat.emissiveColor){mat.emissiveColor=mat.diffuseColor.scale(.28);}
+      if(mat.albedoColor&&mat.emissiveColor){mat.emissiveColor=mat.albedoColor.scale(.12);}
+      else if(mat.diffuseColor&&mat.emissiveColor){mat.emissiveColor=mat.diffuseColor.scale(.12);}
      }
     });
 
