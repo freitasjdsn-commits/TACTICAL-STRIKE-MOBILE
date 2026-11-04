@@ -53,24 +53,20 @@ if(BABYLON.DefaultRenderingPipeline){
  imagePipeline.sharpen.edgeAmount=.24;
  imagePipeline.imageProcessingEnabled=false;
 }
-// Bright, neutral daylight: these are the final overrides used by the scene.
-scene.imageProcessingConfiguration.toneMappingEnabled=false;
-scene.imageProcessingConfiguration.exposure=2.35;
-scene.imageProcessingConfiguration.contrast=1;
+// Balanced neutral daylight: readable shadows, natural colors and softer highlights.
+scene.imageProcessingConfiguration.toneMappingEnabled=true;
+scene.imageProcessingConfiguration.exposure=1.25;
+scene.imageProcessingConfiguration.contrast=1.12;
 scene.fogDensity=0;
-scene.clearColor=new BABYLON.Color4(.78,.88,.96,1);
-sun.intensity=3.6;
-sun.diffuse=new BABYLON.Color3(1,1,.98);
-hemi.intensity=3.4;
-hemi.diffuse=new BABYLON.Color3(1,1,1);
-hemi.groundColor=new BABYLON.Color3(.92,.91,.86);
-scene.ambientColor=new BABYLON.Color3(1,1,1);
+scene.clearColor=new BABYLON.Color4(.66,.79,.88,1);
+sun.intensity=2.15;
+sun.diffuse=new BABYLON.Color3(1,.96,.88);
+hemi.intensity=1.65;
+hemi.diffuse=new BABYLON.Color3(.82,.9,1);
+hemi.groundColor=new BABYLON.Color3(.34,.38,.32);
+scene.ambientColor=new BABYLON.Color3(.32,.35,.38);
 scene.fogMode=BABYLON.Scene.FOGMODE_NONE;
-hemi.intensity=5.2;
-sun.intensity=4.8;
-scene.environmentIntensity=1.8;
-scene.imageProcessingConfiguration.exposure=3.0;
-scene.imageProcessingConfiguration.contrast=.88;
+scene.environmentIntensity=1.0;
 
 scene.imageProcessingConfiguration.applyByPostProcess=false;
 scene.imageProcessingConfiguration.colorCurvesEnabled=false;
@@ -172,7 +168,7 @@ for(const side of [-1,1]){
 const foliageMat=material("olive foliage detail","#668b45");
 const foliageLight=material("sunlit foliage","#a4bd68");
 // Foliage uses a soft self-lit response so leaves retain green color on mobile.
-[plant,leaf,foliageMat,foliageLight].forEach((m)=>{m.disableLighting=true;m.emissiveColor=m.diffuseColor.scale(.95);m.diffuseColor=m.diffuseColor.scale(1.28);});
+[plant,leaf,foliageMat,foliageLight].forEach((m)=>{m.disableLighting=false;m.emissiveColor=m.diffuseColor.scale(.22);m.diffuseColor=m.diffuseColor.scale(1.38);});
 
 function addShrub(x,z,scale=1){
  const root=new BABYLON.TransformNode("tactical shrub",scene);root.position.set(x,0,z);root.scaling.setAll(scale);
