@@ -377,8 +377,8 @@ function makeBot(x,z,i){
  // Rigged CC0 operators: load, normalize and attach complete skinned GLB characters.
  const rigUrls=[
   "https://models.codelove.in/models/military-male-01.glb",
-  "https://models.codelove.in/models/military-male-03.glb",
-  "https://models.codelove.in/models/military-male-01.glb"
+  "https://models.codelove.in/models/military-male-02.glb",
+  "https://models.codelove.in/models/military-male-03.glb"
  ];
  const rigContainers={};
  async function rigBot(bot){
