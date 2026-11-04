@@ -136,9 +136,10 @@ for(let i=0;i<5;i++){
 }
 const barkMat=material("tree bark","#76543a");
 for(let i=0;i<8;i++){
- const x=(i%6-2.5)*7,z=i<6?28:-29;
- const trunk=cylinder("yard tree trunk",x,1.1,z,2.2,.34,barkMat);
- const crown=BABYLON.MeshBuilder.CreateSphere("low foliage",{diameter:2.8,segments:7},scene);crown.position.set(x,2.5,z);crown.scaling.y=.78;crown.material=plant;
+ // Trees stay outside the combat lane and farther from the camera.
+ const x=(i%6-2.5)*10.5,z=i<6?38:-42;
+ const trunk=cylinder("yard tree trunk",x,1.25,z,2.5,.28,barkMat);
+ const crown=BABYLON.MeshBuilder.CreateSphere("low foliage",{diameter:1.85,segments:9},scene);crown.position.set(x,2.85,z);crown.scaling.set(1,.82,1);crown.material=plant;
 }
 for(let i=0;i<9;i++){
  const x=-24+i*6;
