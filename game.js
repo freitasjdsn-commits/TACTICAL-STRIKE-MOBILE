@@ -376,9 +376,9 @@ function makeBot(x,z,i){
 [[-2,-10],[2,-9],[-2.5,-7],[2.5,-6],[0,-4],[-1.8,-2],[1.8,0]].forEach((p,i)=>makeBot(p[0],p[1],i));
  // Rigged CC0 operators: load, normalize and attach complete skinned GLB characters.
  const rigUrls=[
-  "https://gobkit.com/freebies/human004/Rifleman.glb",
-  "https://gobkit.com/freebies/human004/ReconScout.glb",
-  "https://gobkit.com/freebies/human004/MachineGunner.glb"
+  "https://models.codelove.in/models/military-male-01.glb",
+  "https://models.codelove.in/models/military-male-03.glb",
+  "https://models.codelove.in/models/military-male-01.glb"
  ];
  const rigContainers={};
  async function rigBot(bot){
@@ -398,13 +398,13 @@ function makeBot(x,z,i){
    });
    bot.modelMeshes=[...new Set(meshes)].filter(m=>m.getTotalVertices()>0);
    if(!bot.modelMeshes.length)throw new Error("GLB carregou, mas não contém malhas visíveis");
-   bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.checkCollisions=false;try{m.enableEdgesRendering(.995);m.edgesWidth=1.15;m.edgesColor=new BABYLON.Color4(.025,.045,.065,.48);}catch(e){}});
+   bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.checkCollisions=false;try{m.disableEdgesRendering();}catch(e){}});
     bot.modelMeshes.forEach(mesh=>{
      const mat=mesh.material;
      if(mat){
       mat.disableLighting=false;
-      if(mat.albedoColor&&mat.emissiveColor){mat.emissiveColor=mat.albedoColor.scale(.22);}
-      else if(mat.diffuseColor&&mat.emissiveColor){mat.emissiveColor=mat.diffuseColor.scale(.22);}
+      if(mat.albedoColor&&mat.emissiveColor){mat.emissiveColor=mat.albedoColor.scale(.08);}
+      else if(mat.diffuseColor&&mat.emissiveColor){mat.emissiveColor=mat.diffuseColor.scale(.08);}
      }
     });
 
