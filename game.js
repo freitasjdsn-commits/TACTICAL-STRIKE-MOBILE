@@ -433,12 +433,23 @@ function makeBot(x,z,i){
    bot.legacyMeshes.forEach(m=>{m.isVisible=false;m.isPickable=false;});
    bot.animGroups=instance.animationGroups||[];
    bot.playAnim=(name,loop=true)=>{
-    const group=bot.animGroups.find(g=>g.name.toLowerCase().includes(name.toLowerCase()));
+    const key=String(name).toLowerCase();
+    const aliases={
+     idle:["idle","stand"],
+     walk:["walk"],
+     run:["run","sprint"],
+     attack:["fire","attack","shoot"],
+     fire:["fire","attack","shoot"],
+     reload:["reload"],
+     death:["death","die"]
+    };
+    const terms=aliases[key]||[key];
+    const group=bot.animGroups.find(g=>terms.some(term=>g.name.toLowerCase().includes(term)));
     if(!group)return false;
-    if(bot.animState===name&&group.isPlaying)return true;
-    bot.animGroups.forEach(g=>g.stop());
-    group.start(loop,1.0,group.from,group.to,false);
-    bot.animState=name;
+    if(bot.animState===group.name&&group.isPlaying)return true;
+    bot.animGroups.forEach(g=>{if(g!==group)g.stop();});
+    group.start(loop,key==="run"?1.08:1.0,group.from,group.to,false);
+    bot.animState=group.name;
     return true;
    };
    bot.modelRoot=modelRoot;
@@ -569,7 +580,7 @@ scene.onBeforeRenderObservable.add(()=>{
  weapon.rotation.copyFrom(camera.rotation);weapon.rotation.x+=recoil*.45;weapon.setEnabled(true);
  if(flashTimer>0){flashTimer-=dt;if(flashTimer<=0)muzzle.isVisible=false}
  if(damageFlash>0){damageFlash-=dt;if(damageFlash<=0&&!gameOver)damageOverlay.style.opacity="0"}if(streakTimer>0){streakTimer=Math.max(0,streakTimer-dt);if(streakTimer===0)killStreak=0;}
- bots.forEach(b=>{if(!b.alive&&b.deathTimer>0){b.deathTimer-=dt;if(b.deathTimer<=0)b.root.setEnabled(false);}if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;b.stateTimer-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz),nx=dx/(dist||1),nz=dz/(dist||1);if(b.stateTimer<=0){b.stateTimer=1.7+Math.random()*1.8;b.combatState=dist>18?"patrol":b.role===1?(dist<7?"reposition":"flank"):b.role===2?(dist<5?"advance":"hold"):(dist<5?"retreat":dist<13?"engage":"advance");}const pace=b.role===2?.45:b.role===1?1.25:.8;let targetX=b.anchorX+Math.sin(stride)*b.patrolX,targetZ=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.combatState==="advance"){targetX+=nx*(b.role===2?2.1:1.4);targetZ+=nz*(b.role===2?2.1:1.4);}else if(b.combatState==="retreat"){targetX-=nx*2;targetZ-=nz*2;}else if(b.combatState==="flank"||b.combatState==="reposition"){const side=b.combatState==="flank"?2.5:1.4;targetX+=nz*b.strafe*side;targetZ-=nx*b.strafe*side;}const speed=(b.combatState==="hold"?.12:b.role===2?.8:b.role===1?2.15:1.5)*dt;if(b.playAnim){b.attackAnimLock=Math.max(0,b.attackAnimLock-dt);if(b.attackAnimLock<=0)b.playAnim(speed>.025?(b.role===1?"Run":"Walk"):"Idle",true);}b.root.position.x+=Math.max(-speed,Math.min(speed,targetX-b.root.position.x));b.root.position.z+=Math.max(-speed,Math.min(speed,targetZ-b.root.position.z));b.root.position.x=Math.max(-29,Math.min(29,b.root.position.x));b.root.position.z=Math.max(-29,Math.min(29,b.root.position.z));b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;b.root.position.y=Math.abs(Math.sin(stride*2.2))*.035*pace;b.body.rotation.z=Math.sin(stride*2.2)*.025*pace;b.head.rotation.x=Math.sin(stride*2.2+.6)*.018;
+ bots.forEach(b=>{if(!b.alive&&b.deathTimer>0){b.deathTimer-=dt;if(b.deathTimer<=0)b.root.setEnabled(false);}if(b.alive){b.phase+=dt*(b.role===1?1.45:b.role===2?.72:1.05);b.decision-=dt;b.stateTimer-=dt;if(b.decision<=0){b.decision=1.2+Math.random()*2.2;b.strafe=Math.random()<.5?-1:1;}const stride=b.phase*(b.role===1?1.55:b.role===2?.8:1.15);const dx=camera.position.x-b.root.position.x,dz=camera.position.z-b.root.position.z,dist=Math.hypot(dx,dz),nx=dx/(dist||1),nz=dz/(dist||1);if(b.stateTimer<=0){b.stateTimer=1.7+Math.random()*1.8;b.combatState=dist>18?"patrol":b.role===1?(dist<7?"reposition":"flank"):b.role===2?(dist<5?"advance":"hold"):(dist<5?"retreat":dist<13?"engage":"advance");}const pace=b.role===2?.45:b.role===1?1.25:.8;let targetX=b.anchorX+Math.sin(stride)*b.patrolX,targetZ=b.anchorZ+Math.cos(stride*.72)*b.patrolZ;if(b.combatState==="advance"){targetX+=nx*(b.role===2?2.1:1.4);targetZ+=nz*(b.role===2?2.1:1.4);}else if(b.combatState==="retreat"){targetX-=nx*2;targetZ-=nz*2;}else if(b.combatState==="flank"||b.combatState==="reposition"){const side=b.combatState==="flank"?2.5:1.4;targetX+=nz*b.strafe*side;targetZ-=nx*b.strafe*side;}const moveRate=b.combatState==="hold"?.12:b.role===2?.8:b.role===1?2.15:1.5;const speed=moveRate*dt;if(b.playAnim){b.attackAnimLock=Math.max(0,b.attackAnimLock-dt);const moving=b.combatState!=="hold"&&Math.hypot(targetX-b.root.position.x,targetZ-b.root.position.z)>.12;if(b.attackAnimLock<=0)b.playAnim(moving?(moveRate>1.7?"Run":"Walk"):"Idle",true);}b.root.position.x+=Math.max(-speed,Math.min(speed,targetX-b.root.position.x));b.root.position.z+=Math.max(-speed,Math.min(speed,targetZ-b.root.position.z));b.root.position.x=Math.max(-29,Math.min(29,b.root.position.x));b.root.position.z=Math.max(-29,Math.min(29,b.root.position.z));b.root.rotation.y=Math.atan2(dx,dz);const step=Math.sin(stride*2.2)*.34*pace;b.limbs[0].rotation.x=step;b.limbs[2].rotation.x=-step;b.limbs[1].rotation.x=-step*.8;b.limbs[3].rotation.x=step*.8;b.root.position.y=Math.abs(Math.sin(stride*2.2))*.035*pace;b.body.rotation.z=Math.sin(stride*2.2)*.025*pace;b.head.rotation.x=Math.sin(stride*2.2+.6)*.018;
  b.attackCooldown-=dt;b.alert=Math.max(0,b.alert-dt);b.muzzleGlow.isVisible=b.alert>0;b.alertLamp.scaling.y=1+(b.alert>0?.5:0);if(dist<18&&dist>2.4&&b.attackCooldown<=0){b.attackCooldown=b.role===1?4.2:b.role===2?6:5.2;enemyShot(b);damagePlayer(b.role===1?2:b.role===2?4:3);}
  }});
  enemyTracers.forEach(t=>{t.life-=dt;if(t.life<=0){t.mesh.dispose();} });for(let i=enemyTracers.length-1;i>=0;i--)if(enemyTracers[i].life<=0)enemyTracers.splice(i,1);
