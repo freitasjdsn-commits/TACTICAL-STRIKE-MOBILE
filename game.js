@@ -373,9 +373,9 @@ function makeBot(x,z,i){
 [[-2,-10],[2,-9],[-2.5,-7],[2.5,-6],[0,-4],[-1.8,-2],[1.8,0]].forEach((p,i)=>makeBot(p[0],p[1],i));
  // Rigged CC0 operators: load, normalize and attach complete skinned GLB characters.
  const rigUrls=[
-  "https://models.codelove.in/models/military-male-01.glb",
-  "https://models.codelove.in/models/military-male-02.glb",
-  "https://models.codelove.in/models/military-male-03.glb"
+  "./models/soldier_rigged%20(1).glb",
+  "./models/soldier_rigged%20(1).glb",
+  "./models/soldier_rigged%20(1).glb"
  ];
  const rigContainers={};
  async function rigBot(bot){
