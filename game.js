@@ -396,26 +396,32 @@ function makeBot(x,z,i){
    bot.modelMeshes=[...new Set(meshes)].filter(m=>m.getTotalVertices()>0);
    if(!bot.modelMeshes.length)throw new Error("GLB carregou, mas não contém malhas visíveis");
    bot.modelMeshes.forEach(m=>{m.isVisible=true;m.isPickable=true;m.setEnabled(true);m.checkCollisions=false;try{m.disableEdgesRendering();}catch(e){}});
-    // Give the untextured GLB a brighter, more readable tactical finish on mobile.
+    // Material readability pass: retain original textures while lifting shaded
+    // surfaces slightly, with restrained visor and metal accents on mobile.
+    const brighten=(color,factor)=>new BABYLON.Color3(
+     Math.min(1,color.r*factor),Math.min(1,color.g*factor),Math.min(1,color.b*factor)
+    );
     bot.modelMeshes.forEach(mesh=>{
      const mat=mesh.material;
      if(!mat)return;
      mat.disableLighting=false;
      const materialName=String(mat.name||"").toLowerCase();
      if(mat.albedoColor){
-      if(materialName.includes("olive"))mat.albedoColor=new BABYLON.Color3(.34,.41,.19);
-      else if(materialName.includes("dark"))mat.albedoColor=new BABYLON.Color3(.105,.13,.16);
-      else if(materialName.includes("gunmetal"))mat.albedoColor=new BABYLON.Color3(.34,.40,.46);
-      else if(materialName.includes("visor"))mat.albedoColor=new BABYLON.Color3(.055,.34,.43);
+      if(materialName.includes("olive"))mat.albedoColor=new BABYLON.Color3(.36,.43,.22);
+      else if(materialName.includes("dark"))mat.albedoColor=new BABYLON.Color3(.14,.17,.20);
+      else if(materialName.includes("gunmetal"))mat.albedoColor=new BABYLON.Color3(.39,.45,.50);
+      else if(materialName.includes("visor"))mat.albedoColor=new BABYLON.Color3(.07,.39,.48);
+      else mat.albedoColor=brighten(mat.albedoColor,1.12);
       if(mat.emissiveColor){
-       const glow=materialName.includes("visor")?.42:materialName.includes("dark")?.055:.12;
+       const glow=materialName.includes("visor")?.32:materialName.includes("dark")?.075:.10;
        mat.emissiveColor=mat.albedoColor.scale(glow);
       }
-      if("roughness" in mat)mat.roughness=materialName.includes("gunmetal")?.48:.82;
-      if("metallic" in mat)mat.metallic=materialName.includes("gunmetal")?.22:.04;
-     }else if(mat.diffuseColor&&mat.emissiveColor){
-      mat.diffuseColor=mat.diffuseColor.scale(1.35);
-      mat.emissiveColor=mat.diffuseColor.scale(.12);
+      if("roughness" in mat)mat.roughness=materialName.includes("gunmetal")?.5:.78;
+      if("metallic" in mat)mat.metallic=materialName.includes("gunmetal")?.2:.035;
+     }else if(mat.diffuseColor){
+      mat.diffuseColor=brighten(mat.diffuseColor,1.16);
+      if(mat.emissiveColor)mat.emissiveColor=mat.diffuseColor.scale(.10);
+      if("specularPower" in mat)mat.specularPower=42;
      }
     });
 
