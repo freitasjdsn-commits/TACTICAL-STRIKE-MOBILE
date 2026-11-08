@@ -17,7 +17,7 @@ scene.imageProcessingConfiguration.vignetteCameraFov=.5;
 const camera=new BABYLON.FreeCamera("player",new BABYLON.Vector3(0,1.72,-13),scene);
 scene.activeCamera=camera;
 camera.fov=.88;camera.minZ=.06;camera.maxZ=180;camera.inputs.clear();
-const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=1.65;hemi.groundColor=new BABYLON.Color3(.42,.44,.46);scene.ambientColor=new BABYLON.Color3(.38,.4,.42);
+const hemi=new BABYLON.HemisphericLight("sky fill",new BABYLON.Vector3(0,1,0),scene);hemi.intensity=2.45;hemi.groundColor=new BABYLON.Color3(.42,.44,.46);scene.ambientColor=new BABYLON.Color3(.38,.4,.42);
 const sun=new BABYLON.DirectionalLight("sun",new BABYLON.Vector3(-.5,-1,.4),scene);sun.position.set(-20,35,-20);sun.intensity=1.7;
 const shadowGen=null;
 // Large procedural sky dome: a visible horizon and dusk-to-day atmospheric gradient.
@@ -55,16 +55,16 @@ if(BABYLON.DefaultRenderingPipeline){
 }
 // Balanced neutral daylight: readable shadows, natural colors and softer highlights.
 scene.imageProcessingConfiguration.toneMappingEnabled=true;
-scene.imageProcessingConfiguration.exposure=1.25;
-scene.imageProcessingConfiguration.contrast=1.12;
+scene.imageProcessingConfiguration.exposure=1.62;
+scene.imageProcessingConfiguration.contrast=1.02;
 scene.fogDensity=0;
 scene.clearColor=new BABYLON.Color4(.66,.79,.88,1);
-sun.intensity=2.65;
+sun.intensity=2.75;
 sun.diffuse=new BABYLON.Color3(1,.96,.88);
-hemi.intensity=2.15;
+hemi.intensity=2.45;
 hemi.diffuse=new BABYLON.Color3(.82,.9,1);
-hemi.groundColor=new BABYLON.Color3(.34,.38,.32);
-scene.ambientColor=new BABYLON.Color3(.48,.51,.46);
+hemi.groundColor=new BABYLON.Color3(.48,.49,.40);
+scene.ambientColor=new BABYLON.Color3(.55,.57,.53);
 scene.fogMode=BABYLON.Scene.FOGMODE_NONE;
 scene.environmentIntensity=1.0;
 
@@ -72,7 +72,7 @@ scene.imageProcessingConfiguration.applyByPostProcess=false;
 scene.imageProcessingConfiguration.colorCurvesEnabled=false;
 scene.imageProcessingConfiguration.colorGradingEnabled=false;
 // Keep shaded faces readable even on mobile displays with limited dynamic range.
-function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.emissiveColor=m.diffuseColor.scale(.31);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
+function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.emissiveColor=m.diffuseColor.scale(.34);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
 sand.diffuseTexture=sandTex;sand.diffuseColor=new BABYLON.Color3(.94,.91,.84);sand.specularColor=new BABYLON.Color3(.08,.075,.065);
@@ -89,9 +89,9 @@ function textureRand(){textureSeed=(textureSeed*1664525+1013904223)>>>0;return t
 for(let i=0;i<26000;i++){const x=textureRand()*1024,y=textureRand()*1024,a=.025+textureRand()*.13,s=.5+textureRand()*2.8;asphaltCtx.fillStyle=textureRand()>.5?"rgba(210,218,214,"+a+")":"rgba(5,13,18,"+a+")";asphaltCtx.fillRect(x,y,s,s);}
 for(let i=0;i<52;i++){const x=textureRand()*1024,y=textureRand()*1024;asphaltCtx.strokeStyle="rgba(12,19,22,.22)";asphaltCtx.lineWidth=.7+textureRand()*1.2;asphaltCtx.beginPath();asphaltCtx.moveTo(x,y);asphaltCtx.lineTo(x+(textureRand()-.5)*45,y+textureRand()*26);asphaltCtx.stroke();}
 asphaltTexture.update(false);asphaltTexture.anisotropicFilteringLevel=4;asphaltTexture.uScale=7;asphaltTexture.vScale=7;asphaltTexture.wrapU=BABYLON.Texture.WRAP_ADDRESSMODE;asphaltTexture.wrapV=BABYLON.Texture.WRAP_ADDRESSMODE;
-asphalt.diffuseTexture=asphaltTexture;asphalt.diffuseColor=new BABYLON.Color3(1,1,1);asphalt.emissiveColor=new BABYLON.Color3(.38,.39,.38);asphalt.specularColor=new BABYLON.Color3(.055,.06,.065);
-concrete.emissiveColor=new BABYLON.Color3(.23,.23,.21);
-sand.emissiveColor=new BABYLON.Color3(.25,.22,.17);
+asphalt.diffuseTexture=asphaltTexture;asphalt.diffuseColor=new BABYLON.Color3(1,1,1);asphalt.emissiveColor=new BABYLON.Color3(.52,.53,.49);asphalt.specularColor=new BABYLON.Color3(.055,.06,.065);
+concrete.emissiveColor=new BABYLON.Color3(.32,.32,.29);
+sand.emissiveColor=new BABYLON.Color3(.34,.30,.23);
 steel.emissiveColor=new BABYLON.Color3(.13,.14,.15);
 edge.emissiveColor=new BABYLON.Color3(.15,.15,.15);
 glass.emissiveColor=new BABYLON.Color3(.07,.09,.1);
@@ -414,19 +414,19 @@ function makeBot(x,z,i){
      const materialName=String(mat.name||"").toLowerCase();
      if(mat.albedoColor){
       if(materialName.includes("olive"))mat.albedoColor=new BABYLON.Color3(.36,.43,.22);
-      else if(materialName.includes("dark"))mat.albedoColor=new BABYLON.Color3(.14,.17,.20);
+      else if(materialName.includes("dark"))mat.albedoColor=new BABYLON.Color3(.23,.27,.30);
       else if(materialName.includes("gunmetal"))mat.albedoColor=new BABYLON.Color3(.39,.45,.50);
       else if(materialName.includes("visor"))mat.albedoColor=new BABYLON.Color3(.07,.39,.48);
-      else mat.albedoColor=brighten(mat.albedoColor,1.12);
+      else mat.albedoColor=brighten(mat.albedoColor,1.30);
       if(mat.emissiveColor){
-       const glow=materialName.includes("visor")?.34:materialName.includes("dark")?.13:.17;
+       const glow=materialName.includes("visor")?.38:materialName.includes("dark")?.18:.20;
        mat.emissiveColor=mat.albedoColor.scale(glow);
       }
       if("roughness" in mat)mat.roughness=materialName.includes("gunmetal")?.5:.78;
       if("metallic" in mat)mat.metallic=materialName.includes("gunmetal")?.2:.035;
      }else if(mat.diffuseColor){
-      mat.diffuseColor=brighten(mat.diffuseColor,1.16);
-      if(mat.emissiveColor)mat.emissiveColor=mat.diffuseColor.scale(.16);
+      mat.diffuseColor=brighten(mat.diffuseColor,1.28);
+      if(mat.emissiveColor)mat.emissiveColor=mat.diffuseColor.scale(.19);
       if("specularPower" in mat)mat.specularPower=42;
      }
     });
