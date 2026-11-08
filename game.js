@@ -135,11 +135,17 @@ for(let i=0;i<5;i++){
  for(let k=-1;k<=1;k++)box("barricade reflective stripe",x+k*1.8,.68,22.45, .65,.75,.035,redLight);
 }
 const barkMat=material("tree bark","#76543a");
+barkMat.diffuseColor=new BABYLON.Color3(.48,.32,.20);
+barkMat.emissiveColor=new BABYLON.Color3(.13,.085,.045);
+const treeCanopyMat=material("sunlit tree canopy","#7eaa55");
+treeCanopyMat.diffuseColor=new BABYLON.Color3(.58,.72,.39);
+treeCanopyMat.emissiveColor=new BABYLON.Color3(.20,.27,.11);
+treeCanopyMat.disableLighting=true;
 for(let i=0;i<8;i++){
  // Trees stay outside the combat lane and farther from the camera.
  const x=(i%6-2.5)*10.5,z=i<6?38:-42;
  const trunk=cylinder("yard tree trunk",x,1.25,z,2.5,.28,barkMat);
- const crown=BABYLON.MeshBuilder.CreateSphere("low foliage",{diameter:1.85,segments:9},scene);crown.position.set(x,2.85,z);crown.scaling.set(1,.82,1);crown.material=plant;
+ const crown=BABYLON.MeshBuilder.CreateSphere("low foliage",{diameter:1.85,segments:9},scene);crown.position.set(x,2.85,z);crown.scaling.set(1,.82,1);crown.material=treeCanopyMat;
 }
 for(let i=0;i<9;i++){
  const x=-24+i*6;
