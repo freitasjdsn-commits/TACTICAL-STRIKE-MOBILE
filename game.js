@@ -59,12 +59,12 @@ scene.imageProcessingConfiguration.exposure=1.25;
 scene.imageProcessingConfiguration.contrast=1.12;
 scene.fogDensity=0;
 scene.clearColor=new BABYLON.Color4(.66,.79,.88,1);
-sun.intensity=2.15;
+sun.intensity=2.65;
 sun.diffuse=new BABYLON.Color3(1,.96,.88);
-hemi.intensity=1.65;
+hemi.intensity=2.15;
 hemi.diffuse=new BABYLON.Color3(.82,.9,1);
 hemi.groundColor=new BABYLON.Color3(.34,.38,.32);
-scene.ambientColor=new BABYLON.Color3(.32,.35,.38);
+scene.ambientColor=new BABYLON.Color3(.48,.51,.46);
 scene.fogMode=BABYLON.Scene.FOGMODE_NONE;
 scene.environmentIntensity=1.0;
 
@@ -72,7 +72,7 @@ scene.imageProcessingConfiguration.applyByPostProcess=false;
 scene.imageProcessingConfiguration.colorCurvesEnabled=false;
 scene.imageProcessingConfiguration.colorGradingEnabled=false;
 // Keep shaded faces readable even on mobile displays with limited dynamic range.
-function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.emissiveColor=m.diffuseColor.scale(.24);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
+function material(n,c,rough=48,metal=0){const m=new BABYLON.StandardMaterial(n,scene);m.diffuseColor=BABYLON.Color3.FromHexString(c);m.emissiveColor=m.diffuseColor.scale(.31);m.specularColor=new BABYLON.Color3(metal? .35:.12,metal?.35:.12,metal?.35:.12);m.specularPower=rough;return m}
 const asphalt=material("worn asphalt","#39464d"),concrete=material("warm concrete","#858b89"),sand=material("sandstone","#a49a86"),shadow=material("deep shadow","#1b252c"),steel=material("painted steel","#465660"),edge=material("edge metal","#87949a"),glass=material("blue dark glass","#203b49",12,.3),red=material("enemy red armor","#a5233d"),redLight=material("red armor highlights","#ef4c63"),skin=material("skin","#c9967e"),uniform=material("navy uniform","#263746"),black=material("weapon black","#111a20",16,.45),rubber=material("rubber","#20272b"),plant=material("dry vegetation","#65734c"),leaf=material("olive leaf","#87905a"),purple=material("purple haze","#9a52df");
 concrete.diffuseTexture=concreteTex;concrete.diffuseColor=new BABYLON.Color3(.92,.94,.95);concrete.specularColor=new BABYLON.Color3(.07,.07,.065);
 sand.diffuseTexture=sandTex;sand.diffuseColor=new BABYLON.Color3(.94,.91,.84);sand.specularColor=new BABYLON.Color3(.08,.075,.065);
@@ -419,14 +419,14 @@ function makeBot(x,z,i){
       else if(materialName.includes("visor"))mat.albedoColor=new BABYLON.Color3(.07,.39,.48);
       else mat.albedoColor=brighten(mat.albedoColor,1.12);
       if(mat.emissiveColor){
-       const glow=materialName.includes("visor")?.32:materialName.includes("dark")?.075:.10;
+       const glow=materialName.includes("visor")?.34:materialName.includes("dark")?.13:.17;
        mat.emissiveColor=mat.albedoColor.scale(glow);
       }
       if("roughness" in mat)mat.roughness=materialName.includes("gunmetal")?.5:.78;
       if("metallic" in mat)mat.metallic=materialName.includes("gunmetal")?.2:.035;
      }else if(mat.diffuseColor){
       mat.diffuseColor=brighten(mat.diffuseColor,1.16);
-      if(mat.emissiveColor)mat.emissiveColor=mat.diffuseColor.scale(.10);
+      if(mat.emissiveColor)mat.emissiveColor=mat.diffuseColor.scale(.16);
       if("specularPower" in mat)mat.specularPower=42;
      }
     });
