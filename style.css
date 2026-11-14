@@ -126,3 +126,13 @@ header,#mission,#crosshair,#weapon-overlay,#hud,#joystick,#actions{z-index:5}
   line-height:1.35!important;letter-spacing:1px!important;
  }
 }
+
+
+/* v10 mobile readability and framing fixes */
+#renderCanvas{filter:brightness(1.32) saturate(1.28) contrast(1.03)!important}
+@media(max-width:600px){
+ header{right:58px!important;padding:12px 10px!important;gap:8px!important;min-width:0!important}
+ header>b{font-size:clamp(12px,3.6vw,17px)!important;letter-spacing:.7px!important;white-space:nowrap!important}
+ header small{display:none!important}
+ #model-load-status{bottom:8px!important;max-width:82vw!important;font-size:10px!important}
+}
