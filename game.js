@@ -555,6 +555,7 @@ Promise.all(bots.map(async b=>({ok:await rigBot(b)}))).then(results=>{
  const loaded=results.filter(x=>x.ok).length,failed=results.length-loaded;
  modelStatus.textContent=failed===0?"SOLDADOS 3D: "+loaded+"/"+bots.length+" CARREGADOS":"SOLDADOS 3D: "+loaded+"/"+bots.length+" • FALHAS: "+failed;
  modelStatus.style.borderColor=failed===0?"#65d6a2":"#ff7182";
+ if(failed===0){modelStatus.style.transition="opacity .6s ease";setTimeout(()=>{modelStatus.style.opacity="0";setTimeout(()=>modelStatus.remove(),700);},3200);}
 });
 bots.forEach(b=>{
  b.root.scaling.setAll(.792);
