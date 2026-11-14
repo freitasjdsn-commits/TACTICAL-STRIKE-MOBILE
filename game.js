@@ -580,7 +580,7 @@ weaponBox("rifle optic lens",0,.27,.13,.095,.085,.018,redLight);
 const muzzle=weaponBox("muzzle flash",0,0,1.23,.26,.24,.1,muzzleMat);muzzle.isVisible=false;
 let ammo=30,reserveAmmo=90,reloadTimer=0,score=0,combatPoints=0,killStreak=0,bestStreak=0,streakTimer=0,recoil=0,flashTimer=0,health=300,gameOver=false,damageFlash=0,shotsFired=0,hitsLanded=0,headshots=0,damageDealt=0,hitMarkerTimer=0;
 const ammoEl=document.querySelector("#ammo"),msg=document.querySelector("#message"),healthEl=document.querySelector("#health"),crosshair=document.querySelector("#crosshair");
-const damageOverlay=document.createElement("div");damageOverlay.id="damage-overlay";damageOverlay.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:25;opacity:0;background:radial-gradient(ellipse at center,transparent 48%,rgba(255,35,55,.34) 100%);transition:opacity .16s";document.body.appendChild(damageOverlay);
+const damageOverlay=document.createElement("div");damageOverlay.id="damage-overlay";damageOverlay.style.cssText="position:fixed;inset:0;pointer-events:none;z-index:25;opacity:0;background:radial-gradient(ellipse at center,transparent 48%,rgba(255,35,55,.12) 100%);transition:opacity .16s";document.body.appendChild(damageOverlay);
 const resultOverlay=document.createElement("div");resultOverlay.id="match-result";resultOverlay.style.cssText="position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(5,12,18,.86);backdrop-filter:blur(7px);font-family:Arial,sans-serif;text-align:center;color:#fff";
 resultOverlay.innerHTML='<div style="width:min(90vw,420px);padding:30px 24px;border:1px solid #718692;background:linear-gradient(145deg,#182832,#0b1219);box-shadow:0 18px 60px #000b"><div id="result-kicker" style="font-size:12px;letter-spacing:4px;color:#a8bac4">OPERAÇÃO CONCLUÍDA</div><div id="result-title" style="font-size:clamp(32px,9vw,48px);font-weight:900;letter-spacing:2px;margin:14px 0">VITÓRIA</div><div id="result-detail" style="font-size:15px;color:#c2cdd2;margin-bottom:26px">ALVOS ELIMINADOS: 0/7</div><button id="restart-match" style="width:100%;padding:16px;border:0;background:#d63c50;color:white;font-weight:900;font-size:15px;letter-spacing:1.5px;border-radius:4px">JOGAR NOVAMENTE</button></div>';
 document.body.appendChild(resultOverlay);
@@ -605,7 +605,7 @@ function playSfx(kind){
 audioButton.addEventListener("click",()=>{audioMuted=!audioMuted;audioButton.textContent=audioMuted?"SOM OFF":"SOM ON";audioButton.setAttribute("aria-pressed",String(!audioMuted));if(!audioMuted)playSfx("reload");});
 function finishMatch(won){if(gameOver)return;gameOver=true;msg.textContent=won?"ÁREA LIMPA — VITÓRIA":"DERROTA — VOCÊ FOI ELIMINADO";document.querySelector("#result-title").textContent=won?"VITÓRIA":"DERROTA";document.querySelector("#result-title").style.color=won?"#8df0b0":"#ff6378";document.querySelector("#result-detail").textContent="ALVOS: "+score+"/"+bots.length+" • PONTUAÇÃO: "+combatPoints+" • MELHOR SÉRIE: "+bestStreak+" • PRECISÃO: "+(shotsFired?Math.round(hitsLanded/shotsFired*100):0)+"% • HEADSHOTS: "+headshots+" • DANO CAUSADO: "+damageDealt+(won?" • ÁREA SEGURA":" • OPERADOR ELIMINADO");resultOverlay.style.display="flex";if(!won)damageOverlay.style.opacity="1";}
 function updateHealth(){healthEl.textContent="♥ "+health;healthEl.style.color=health<=30?"#ff536b":health<=60?"#ffd477":"#8df0b0";}
-function damagePlayer(amount){if(gameOver)return;playSfx("damage");health=Math.max(0,health-amount);updateHealth();damageFlash=.22;damageOverlay.style.opacity=".58";msg.textContent="VOCÊ FOI ATINGIDO • -"+amount+" HP";if(health<=0)finishMatch(false);}
+function damagePlayer(amount){if(gameOver)return;playSfx("damage");health=Math.max(0,health-amount);updateHealth();damageFlash=.22;damageOverlay.style.opacity=".22";msg.textContent="VOCÊ FOI ATINGIDO • -"+amount+" HP";if(health<=0)finishMatch(false);}
 const tracerMat=material("enemy tracer material","#ff765f");tracerMat.emissiveColor=new BABYLON.Color3(1,.16,.08);
 const enemyTracers=[];
 function enemyShot(b){playSfx("enemy");if(b.playAnim){b.attackAnimLock=.6;b.playAnim("Attack",false);}const start=b.root.position.add(new BABYLON.Vector3(0,1.18,0));const target=camera.position.add(new BABYLON.Vector3(0,-.35,0));const delta=target.subtract(start);const length=delta.length();const beam=BABYLON.MeshBuilder.CreateCylinder("enemy tracer",{height:length,diameter:.035,tessellation:6},scene);beam.material=tracerMat;beam.position=start.add(target).scale(.5);beam.rotationQuaternion=BABYLON.Quaternion.FromUnitVectorsToRef?BABYLON.Quaternion.FromUnitVectorsToRef(BABYLON.Axis.Y,delta.normalize(),BABYLON.Quaternion.Identity()):null;if(!beam.rotationQuaternion){beam.lookAt(target);beam.rotation.x+=Math.PI/2;}enemyTracers.push({mesh:beam,life:.12});b.muzzleGlow.isVisible=true;b.alert=.35;}
@@ -708,6 +708,13 @@ plant.diffuseColor=new BABYLON.Color3(.48,.62,.29);plant.emissiveColor=new BABYL
 leaf.diffuseColor=new BABYLON.Color3(.50,.70,.28);leaf.emissiveColor=new BABYLON.Color3(.045,.065,.018);
 treeCanopyMat.diffuseColor=new BABYLON.Color3(.43,.68,.27);treeCanopyMat.emissiveColor=new BABYLON.Color3(.035,.06,.018);
 barkMat.emissiveColor=new BABYLON.Color3(.035,.022,.012);
+// V13 — natural daylight balance and subtle damage feedback.
+sun.intensity=2.65;sun.diffuse=new BABYLON.Color3(1,.96,.87);
+hemi.intensity=2.35;hemi.diffuse=new BABYLON.Color3(.76,.88,1);hemi.groundColor=new BABYLON.Color3(.48,.43,.34);
+daylightFill.intensity=.72;warmBounce.intensity=.28;
+scene.ambientColor=new BABYLON.Color3(.34,.35,.31);
+scene.imageProcessingConfiguration.exposure=1.28;scene.imageProcessingConfiguration.contrast=1.22;
+scene.imageProcessingConfiguration.vignetteEnabled=false;scene.fogMode=BABYLON.Scene.FOGMODE_NONE;
 engine.runRenderLoop(()=>{try{scene.render()}catch(err){console.error(err);const m=document.querySelector("#message");if(m)m.textContent="ERRO AO RENDERIZAR: "+err.message;engine.stopRenderLoop()}});
 window.addEventListener("resize",()=>{engine.resize();engine.setSize(canvas.clientWidth,canvas.clientHeight)});
 document.addEventListener("contextmenu",e=>e.preventDefault());updateHud();updateHealth();
