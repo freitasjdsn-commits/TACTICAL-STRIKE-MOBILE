@@ -690,6 +690,24 @@ scene.materials.forEach(v11LiftMaterial);scene.onNewMaterialAddedObservable.add(
 concrete.emissiveColor=new BABYLON.Color3(.56,.55,.49);sand.emissiveColor=new BABYLON.Color3(.58,.48,.32);
 asphalt.emissiveColor=new BABYLON.Color3(.68,.68,.62);plant.emissiveColor=new BABYLON.Color3(.28,.34,.13);
 leaf.emissiveColor=new BABYLON.Color3(.34,.40,.16);treeCanopyMat.emissiveColor=new BABYLON.Color3(.34,.46,.19);
+// V12 — remove the washed-out look and restore natural material color.
+sun.intensity=2.15;sun.diffuse=new BABYLON.Color3(1,.94,.82);
+hemi.intensity=1.75;hemi.diffuse=new BABYLON.Color3(.78,.88,1);hemi.groundColor=new BABYLON.Color3(.42,.39,.31);
+daylightFill.intensity=.48;warmBounce.intensity=.18;
+scene.ambientColor=new BABYLON.Color3(.25,.27,.25);
+scene.imageProcessingConfiguration.toneMappingEnabled=false;
+scene.imageProcessingConfiguration.exposure=1.12;scene.imageProcessingConfiguration.contrast=1.18;
+scene.clearColor=new BABYLON.Color4(.48,.67,.79,1);
+scene.fogMode=BABYLON.Scene.FOGMODE_NONE;scene.fogDensity=0;
+asphalt.emissiveColor=new BABYLON.Color3(.075,.09,.10);
+concrete.diffuseColor=new BABYLON.Color3(.88,.85,.76);concrete.emissiveColor=new BABYLON.Color3(.045,.045,.038);
+sand.diffuseColor=new BABYLON.Color3(.94,.83,.65);sand.emissiveColor=new BABYLON.Color3(.055,.042,.025);
+steel.emissiveColor=new BABYLON.Color3(.035,.045,.052);edge.emissiveColor=new BABYLON.Color3(.04,.045,.045);
+glass.emissiveColor=new BABYLON.Color3(.025,.055,.075);
+plant.diffuseColor=new BABYLON.Color3(.48,.62,.29);plant.emissiveColor=new BABYLON.Color3(.035,.055,.018);
+leaf.diffuseColor=new BABYLON.Color3(.50,.70,.28);leaf.emissiveColor=new BABYLON.Color3(.045,.065,.018);
+treeCanopyMat.diffuseColor=new BABYLON.Color3(.43,.68,.27);treeCanopyMat.emissiveColor=new BABYLON.Color3(.035,.06,.018);
+barkMat.emissiveColor=new BABYLON.Color3(.035,.022,.012);
 engine.runRenderLoop(()=>{try{scene.render()}catch(err){console.error(err);const m=document.querySelector("#message");if(m)m.textContent="ERRO AO RENDERIZAR: "+err.message;engine.stopRenderLoop()}});
 window.addEventListener("resize",()=>{engine.resize();engine.setSize(canvas.clientWidth,canvas.clientHeight)});
 document.addEventListener("contextmenu",e=>e.preventDefault());updateHud();updateHealth();
