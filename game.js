@@ -51,7 +51,7 @@ if(BABYLON.DefaultRenderingPipeline){
  imagePipeline.sharpenEnabled=true;
  imagePipeline.sharpen.colorAmount=.3;
  imagePipeline.sharpen.edgeAmount=.24;
- imagePipeline.imageProcessingEnabled=true;
+ imagePipeline.imageProcessingEnabled=false;
 }
 // Daylight v4: stronger diffuse fill and softer contrast for mobile displays.
 scene.imageProcessingConfiguration.toneMappingEnabled=true;
