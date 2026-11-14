@@ -133,6 +133,59 @@ for(let i=0;i<5;i++){
  const x=-24+i*12;box("road barricade",x,.65,23,7,1.3,1.05,concrete);
  for(let k=-1;k<=1;k++)box("barricade reflective stripe",x+k*1.8,.68,22.45, .65,.75,.035,redLight);
 }
+// Industrial warehouse expansion inspired by the reference gameplay video.
+function makeShippingContainer(name,x,z,color){
+ const shell=material(name+" painted steel",color,28,.18);
+ shell.emissiveColor=new BABYLON.Color3(.13,.15,.16);
+ const trim=material(name+" corner trim","#a6b0b2",20,.35);
+ const dark=material(name+" door recess","#26343b",30,.12);
+ box(name+" main body",x,1.42,z,7.2,2.84,2.65,shell);
+ // Repeating vertical ribs make the container read clearly at mobile distance.
+ for(let i=-6;i<=6;i++){
+  box(name+" side corrugation",x+i*.52,1.42,z-1.345,.075,2.58,.055,trim);
+ }
+ for(const side of [-1,1]){
+  box(name+" corner post",x+side*3.48,1.42,z-1.39,.18,2.82,.13,trim);
+  box(name+" end door",x+side*1.72,1.42,z+1.345,3.35,2.62,.06,dark);
+  for(let k=0;k<7;k++)box(name+" door rib",x+side*1.72,1.42,z+1.39,.055,2.45,.035,trim);
+  box(name+" door locking bar",x+side*1.72,1.42,z+1.43,.07,2.3,.06,edge);
+ }
+ box(name+" top rail",x,2.88,z,7.25,.12,2.72,trim);
+ box(name+" bottom rail",x,.035,z,7.25,.12,2.72,trim);
+ return shell;
+}
+makeShippingContainer("blue cargo container",-11,17,"#315d70");
+makeShippingContainer("red cargo container",11,17,"#75404a");
+makeShippingContainer("olive cargo container",-20,29,"#59664a");
+makeShippingContainer("sand cargo container",20,29,"#8a7656");
+// High warehouse canopy and open trusses: gives the yard an industrial hangar silhouette.
+const warehouseSteel=material("warehouse structural steel","#596a72",24,.32);
+const roofLight=material("warehouse skylight glass","#8fc5d8",12,.18);
+roofLight.emissiveColor=new BABYLON.Color3(.20,.28,.31);
+for(const x of [-26,-13,0,13,26]){
+ box("warehouse roof girder",x,11.8,23,.28,.34,31,warehouseSteel);
+ box("warehouse roof support",x,5.8,8,.24,11.6,.24,warehouseSteel);
+ box("warehouse roof support rear",x,5.8,38,.24,11.6,.24,warehouseSteel);
+}
+for(const z of [8,18,28,38]){
+ box("warehouse cross beam",0,11.65,z,52,.28,.28,warehouseSteel);
+ for(const x of [-19.5,-6.5,6.5,19.5]){
+  const brace=box("warehouse roof diagonal brace",x,10.95,z,8,.12,.12,warehouseSteel);
+  brace.rotation.z=x<0?.18:-.18;
+ }
+}
+for(const x of [-13,0,13]){
+ const panel=box("warehouse skylight panel",x,12.02,23,5.2,.08,25,roofLight);
+ panel.material.alpha=.28;
+}
+box("warehouse rear fascia",0,10.8,40,52,1.8,.35,steel);
+// Soft overhead fill lights lift shaded faces without flattening the scene.
+for(const [i,x,z] of [[0,-15,4],[1,15,4],[2,0,31]]){
+ const fill=new BABYLON.PointLight("warehouse soft fill "+i,new BABYLON.Vector3(x,9,z),scene);
+ fill.diffuse=new BABYLON.Color3(.78,.87,1);
+ fill.intensity=.42;
+ fill.range=34;
+}
 const barkMat=material("tree bark","#76543a");
 barkMat.diffuseColor=new BABYLON.Color3(.48,.32,.20);
 barkMat.emissiveColor=new BABYLON.Color3(.13,.085,.045);
