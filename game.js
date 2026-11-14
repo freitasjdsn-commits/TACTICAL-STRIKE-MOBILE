@@ -665,6 +665,31 @@ scene.onBeforeRenderObservable.add(()=>{
  enemyTracers.forEach(t=>{t.life-=dt;if(t.life<=0){t.mesh.dispose();} });for(let i=enemyTracers.length-1;i>=0;i--)if(enemyTracers[i].life<=0)enemyTracers.splice(i,1);
  hitEffects.forEach(t=>{t.life-=dt;const p=1-t.life/t.max;t.mesh.scaling.setAll(1+p*1.7);t.mesh.visibility=Math.max(0,1-p);t.ring.scaling.setAll(.5+p*1.8);t.ring.visibility=Math.max(0,1-p);});for(let i=hitEffects.length-1;i>=0;i--)if(hitEffects[i].life<=0){hitEffects[i].mesh.dispose();hitEffects[i].ring.dispose();hitEffects.splice(i,1);}
 });
+// V11 — true scene daylight and color recovery, beyond a screen filter.
+const daylightFill=new BABYLON.HemisphericLight("v11 daylight sky fill",new BABYLON.Vector3(0,1,0),scene);
+daylightFill.intensity=1.65;daylightFill.diffuse=new BABYLON.Color3(.78,.91,1);daylightFill.groundColor=new BABYLON.Color3(.68,.62,.48);
+const warmBounce=new BABYLON.PointLight("v11 warm ground bounce",new BABYLON.Vector3(0,7,8),scene);
+warmBounce.diffuse=new BABYLON.Color3(1,.78,.55);warmBounce.intensity=1.1;warmBounce.range=55;
+sun.intensity=4.4;sun.diffuse=new BABYLON.Color3(1,.96,.84);
+hemi.intensity=3.8;hemi.diffuse=new BABYLON.Color3(.82,.91,1);hemi.groundColor=new BABYLON.Color3(.62,.57,.45);
+scene.ambientColor=new BABYLON.Color3(.82,.78,.68);
+scene.imageProcessingConfiguration.toneMappingEnabled=false;scene.imageProcessingConfiguration.exposure=1.85;scene.imageProcessingConfiguration.contrast=1.16;
+scene.imageProcessingConfiguration.vignetteEnabled=false;scene.fogMode=BABYLON.Scene.FOGMODE_NONE;scene.fogDensity=0;
+function v11LiftMaterial(mat){
+ if(!mat||mat.metadata&&mat.metadata.v11Lifted)return;
+ if(!mat.metadata)mat.metadata={};mat.metadata.v11Lifted=true;
+ const n=String(mat.name||"").toLowerCase();
+ if(mat.diffuseColor&&!n.includes("weapon")&&!n.includes("rubber")&&!n.includes("glass")){
+  mat.diffuseColor.r=Math.min(1,mat.diffuseColor.r*1.16+.035);mat.diffuseColor.g=Math.min(1,mat.diffuseColor.g*1.14+.03);mat.diffuseColor.b=Math.min(1,mat.diffuseColor.b*1.12+.025);
+ }
+ if(mat.albedoColor&&!n.includes("weapon")&&!n.includes("rubber")){
+  mat.albedoColor.r=Math.min(1,mat.albedoColor.r*1.12+.025);mat.albedoColor.g=Math.min(1,mat.albedoColor.g*1.10+.02);mat.albedoColor.b=Math.min(1,mat.albedoColor.b*1.08+.02);
+ }
+}
+scene.materials.forEach(v11LiftMaterial);scene.onNewMaterialAddedObservable.add(v11LiftMaterial);
+concrete.emissiveColor=new BABYLON.Color3(.56,.55,.49);sand.emissiveColor=new BABYLON.Color3(.58,.48,.32);
+asphalt.emissiveColor=new BABYLON.Color3(.68,.68,.62);plant.emissiveColor=new BABYLON.Color3(.28,.34,.13);
+leaf.emissiveColor=new BABYLON.Color3(.34,.40,.16);treeCanopyMat.emissiveColor=new BABYLON.Color3(.34,.46,.19);
 engine.runRenderLoop(()=>{try{scene.render()}catch(err){console.error(err);const m=document.querySelector("#message");if(m)m.textContent="ERRO AO RENDERIZAR: "+err.message;engine.stopRenderLoop()}});
 window.addEventListener("resize",()=>{engine.resize();engine.setSize(canvas.clientWidth,canvas.clientHeight)});
 document.addEventListener("contextmenu",e=>e.preventDefault());updateHud();updateHealth();
